@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/
+*.out
+*.err
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Airflow
+airflow.db
+*.pid
+*.sqlite
+*/airflow.cfg
+*/unittests.cfg
+
+# Docker
+*.pid
+*.sock
+
+# Cache
+.cache/
+
+# Falls du bestimmte große Daten NICHT versionieren willst, trag sie gezielt ein:
+# z.B. data/tmp/ oder models/checkpoints/

@@ -1,0 +1,23 @@
+services:
+  airflow:
+    image: apache/airflow:2.9.2
+    container_name: airflow-dev
+    restart: unless-stopped
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=Europe/Zurich
+      # Installiere Libs, die dein DAG braucht:
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn
+    user: "${AIRFLOW_UID:-50000}:0"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./models:/opt/airflow/models
+      - ./data:/opt/airflow/data
+      - ./logs:/opt/airflow/logs
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow standalone"
