@@ -3,10 +3,10 @@
 End-to-end Spam-Classifier with **Flask** for real-time inference and **Apache Airflow** (Docker) for batch scoring.
 
 ## Features
-- ✅ Logistic Regression + TF-IDF (scikit-learn Pipeline)
-- ✅ Flask API `/predict` (JSON in, Prediction & Probability out)
-- ✅ Airflow DAG for daily/manual batch scoring of CSVs
-- ✅ Example model & example CSV included in repo
+- Logistic Regression + TF-IDF (scikit-learn Pipeline)
+- Flask API `/predict` (JSON in, Prediction & Probability out)
+- Airflow DAG for daily/manual batch scoring of CSVs
+- Example model & example CSV included in repo
 
 ## Project Structure
 ```
