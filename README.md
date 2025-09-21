@@ -1,6 +1,8 @@
-# Spam Classifier — Flask API & Airflow Batch Scoring
+from pathlib import Path
 
-“End-to-end spam classifier with a **Flask** API for real-time inference and an **Apache Airflow** (Docker + PostgreSQL) DAG for batch scoring.”
+readme_content = """# Spam Classifier — Flask API & Airflow Batch Scoring
+
+End-to-end spam classifier with a Flask API for real-time inference and an Apache Airflow (Docker + PostgreSQL) DAG for batch scoring.
 
 ## Features
 - Logistic Regression + TF-IDF (scikit-learn Pipeline)
@@ -50,11 +52,31 @@ curl -X POST http://127.0.0.1:5000/predict \
 ```
 
 ## Batch Scoring with Airflow (Docker)
+The metadata DB is PostgreSQL (backed by ./pgdata volume).
+
 ```bash
 cd airflow_docker
 echo "AIRFLOW_UID=$(id -u)" > .env
-docker compose up -d
-# UI -> http://localhost:8080 (Admin login see logs or set manually)
+
+# One-time init (DB migrate, admin user creation)
+docker compose run --rm airflow-init
+
+# Start webserver & scheduler
+docker compose up -d airflow-webserver airflow-scheduler
+
+# UI -> http://localhost:8080 (Login: admin / admin)
+```
+
+## .env example
+```
+AIRFLOW_UID=1000
+POSTGRES_USER=airflow
+POSTGRES_PASSWORD=airflow
+POSTGRES_DB=airflow
+AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+AIRFLOW__CORE__LOAD_EXAMPLES=False
+AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=Europe/Zurich
 ```
 
 **Trigger DAG**
@@ -63,8 +85,8 @@ docker compose up -d
 
 **CLI (inside container)**
 ```bash
-docker exec -it airflow-dev airflow dags trigger spam_batch_scoring
-docker exec -it airflow-dev airflow dags list-runs -d spam_batch_scoring
+docker exec -it airflow-web airflow dags trigger spam_batch_scoring
+docker exec -it airflow-web airflow dags list-runs -d spam_batch_scoring
 ```
 
 ## Data & Model
@@ -78,12 +100,15 @@ docker exec -it airflow-dev airflow dags list-runs -d spam_batch_scoring
 - Scheduler: adjust `schedule_interval` in DAG (e.g. `"0 2 * * *"`).
 
 ## Troubleshooting
-- **Airflow UI not loading:** check logs `docker logs -f airflow-dev`; change port if needed (`"8081:8080"`).
-- **Login in Airflow:** for `standalone` get password  
-  `docker exec -it airflow-dev cat /opt/airflow/standalone_admin_password.txt`  
-  or reset password:  
-  `docker exec -it airflow-dev airflow users reset-password --username admin --password admin`
+- **Airflow UI not loading:** check logs `docker logs -f airflow-web`; change port if needed (`"8081:8080"`).
+- **Reset password:**  
+  ```bash
+  docker exec -it airflow-web airflow users reset-password --username admin --password admin
+  ```
 - **Missing packages:** extend `_PIP_ADDITIONAL_REQUIREMENTS` in `docker-compose.yml` (e.g. `nltk`).
 
 ## License
 Add your license here (e.g. MIT).
+"""
+
+Path("README.md").write_text(readme_content, encoding="utf-8")

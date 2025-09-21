@@ -25,7 +25,12 @@ logs/
 Thumbs.db
 
 # Airflow
+airflow-docker/db/airflow.db
 airflow.db
+airflow-docker/.env
+airflow-docker/pgdata/
+airflow-docker/logs/
+airflow-docker/docker-compose_old
 *.pid
 *.sqlite
 */airflow.cfg

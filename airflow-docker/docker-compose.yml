@@ -1,14 +1,59 @@
 services:
-  airflow:
-    image: apache/airflow:2.9.2
-    container_name: airflow-dev
-    restart: unless-stopped
+  postgres:
+    image: postgres:16
+    container_name: airflow-postgres
     environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Einmaliger Init-Job für Migration & Admin-User
+  airflow-init:
+    image: apache/airflow:2.9.2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn psycopg2-binary
+    user: "${AIRFLOW_UID:-50000}:0"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./models:/opt/airflow/models
+      - ./data:/opt/airflow/data
+      - ./logs:/opt/airflow/logs
+    # WICHTIG: hier Bash als entrypoint, damit die Kette sauber läuft
+    entrypoint: ["/bin/bash", "-lc"]
+    command: >
+      "pip install --no-cache-dir --prefix=/usr/local psycopg2-binary pandas scikit-learn &&
+       airflow db migrate &&
+       airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true"
+
+  airflow-webserver:
+    image: apache/airflow:2.9.2
+    container_name: airflow-web
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=Europe/Zurich
-      # Installiere Libs, die dein DAG braucht:
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn psycopg2-binary
     user: "${AIRFLOW_UID:-50000}:0"
     ports:
       - "8080:8080"
@@ -17,7 +62,26 @@ services:
       - ./models:/opt/airflow/models
       - ./data:/opt/airflow/data
       - ./logs:/opt/airflow/logs
-    command: >
-      bash -c "
-      airflow db init &&
-      airflow standalone"
+    # WICHTIG: hier **kein** /bin/bash – das offizielle EntryPoint startet 'airflow'
+    command: webserver
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.2
+    container_name: airflow-scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn psycopg2-binary
+    user: "${AIRFLOW_UID:-50000}:0"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./models:/opt/airflow/models
+      - ./data:/opt/airflow/data
+      - ./logs:/opt/airflow/logs
+    command: scheduler
