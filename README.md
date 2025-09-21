@@ -1,8 +1,4 @@
-from pathlib import Path
-
-readme_content = """# Spam Classifier — Flask API & Airflow Batch Scoring
-
-End-to-end spam classifier with a Flask API for real-time inference and an Apache Airflow (Docker + PostgreSQL) DAG for batch scoring.
+# End-to-end spam classifier with a Flask API for real-time inference and an Apache Airflow (Docker + PostgreSQL) DAG for batch scoring.
 
 ## Features
 - Logistic Regression + TF-IDF (scikit-learn Pipeline)
