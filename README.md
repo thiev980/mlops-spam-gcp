@@ -104,7 +104,4 @@ docker exec -it airflow-web airflow dags list-runs -d spam_batch_scoring
 - **Missing packages:** extend `_PIP_ADDITIONAL_REQUIREMENTS` in `docker-compose.yml` (e.g. `nltk`).
 
 ## License
-Add your license here (e.g. MIT).
-"""
-
-Path("README.md").write_text(readme_content, encoding="utf-8")
+MIT License
