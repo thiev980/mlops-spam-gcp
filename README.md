@@ -1,6 +1,6 @@
 # Spam Classifier — Flask API & Airflow Batch Scoring
 
-End-to-end Spam-Classifier with **Flask** for real-time inference and **Apache Airflow** (Docker) for batch scoring.
+“End-to-end spam classifier with a **Flask** API for real-time inference and an **Apache Airflow** (Docker + PostgreSQL) DAG for batch scoring.”
 
 ## Features
 - Logistic Regression + TF-IDF (scikit-learn Pipeline)
