@@ -30,7 +30,8 @@ airflow.db
 airflow-docker/.env
 airflow-docker/pgdata/
 airflow-docker/logs/
-airflow-docker/docker-compose_old
+airflow-docker/docker-compose_sqlite.yml
+airflow-docker/docker-compose_postgres.yml
 *.pid
 *.sqlite
 */airflow.cfg

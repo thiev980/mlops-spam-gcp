@@ -1,3 +1,4 @@
+# sqlite + SequentialExecutor
 services:
   airflow:
     image: apache/airflow:2.9.2
