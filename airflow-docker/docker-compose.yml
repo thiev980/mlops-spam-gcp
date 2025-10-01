@@ -40,7 +40,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn psycopg2-binary
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
     #user: "${AIRFLOW_UID:-50000}:0"
     volumes:
       - ./dags:/opt/airflow/dags
@@ -66,7 +66,7 @@ services:
       - AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=Europe/Zurich
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn psycopg2-binary redis
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
     user: "${AIRFLOW_UID:-50000}:0"
     ports: ["8080:8080"]
     volumes:
@@ -89,7 +89,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn psycopg2-binary redis
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
     user: "${AIRFLOW_UID:-50000}:0"
     volumes:
       - ./dags:/opt/airflow/dags
@@ -111,7 +111,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas scikit-learn psycopg2-binary redis
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
     user: "${AIRFLOW_UID:-50000}:0"
     volumes:
       - ./dags:/opt/airflow/dags
