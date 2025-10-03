@@ -1,0 +1,6 @@
+FROM apache/airflow:2.9.2
+
+# Wichtig: als 'airflow'-User installieren und KEIN --user benutzen
+USER airflow
+COPY requirements-airflow.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt

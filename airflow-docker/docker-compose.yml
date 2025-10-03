@@ -30,7 +30,7 @@ services:
  
   # Einmaliger Init-Job für Migration & Admin-User
   airflow-init:
-    image: apache/airflow:2.9.2
+    image: my-airflow:2.9.2
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -40,7 +40,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
     #user: "${AIRFLOW_UID:-50000}:0"
     volumes:
       - ./dags:/opt/airflow/dags
@@ -53,7 +53,7 @@ services:
        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true"
 
   airflow-webserver:
-    image: apache/airflow:2.9.2
+    image: my-airflow:2.9.2
     container_name: airflow-web
     depends_on:
       postgres: { condition: service_healthy }
@@ -66,7 +66,7 @@ services:
       - AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=Europe/Zurich
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
     user: "${AIRFLOW_UID:-50000}:0"
     ports: ["8080:8080"]
     volumes:
@@ -77,7 +77,7 @@ services:
     command: webserver
 
   airflow-scheduler:
-    image: apache/airflow:2.9.2
+    image: my-airflow:2.9.2
     container_name: airflow-scheduler
     depends_on:
       postgres: { condition: service_healthy }
@@ -89,7 +89,11 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
+      - LLM_PROVIDER=openai
+      - LLM_ENDPOINT=https://api.openai.com/v1/chat/completions
+      - LLM_MODEL=gpt-4o-mini
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     user: "${AIRFLOW_UID:-50000}:0"
     volumes:
       - ./dags:/opt/airflow/dags
@@ -99,7 +103,7 @@ services:
     command: scheduler
 
   airflow-worker:
-    image: apache/airflow:2.9.2
+    image: my-airflow:2.9.2
     container_name: airflow-worker
     depends_on:
       postgres: { condition: service_healthy }
@@ -111,7 +115,11 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis
+      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
+      - LLM_PROVIDER=openai
+      - LLM_ENDPOINT=https://api.openai.com/v1/chat/completions
+      - LLM_MODEL=gpt-4o-mini
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     user: "${AIRFLOW_UID:-50000}:0"
     volumes:
       - ./dags:/opt/airflow/dags
