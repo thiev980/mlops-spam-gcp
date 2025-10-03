@@ -46,3 +46,4 @@ airflow-docker/docker-compose_postgres.yml
 
 # Falls du bestimmte große Daten NICHT versionieren willst, trag sie gezielt ein:
 # z.B. data/tmp/ oder models/checkpoints/
+airflow-docker/.env
