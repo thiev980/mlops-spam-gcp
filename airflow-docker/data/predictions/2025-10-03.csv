@@ -1,4 +1,4 @@
-id,text,prob_spam,pred
+id,text,proba_spam,prediction
 1,Congratulations! You've won a gift card,0.30865335221721113,0
 2,Don't forget our lunch date tomorrow,0.3174793956619694,0
 3,Claim your free trial now,0.9358416704093935,1
@@ -92,7 +92,7 @@ id,text,prob_spam,pred
 91,Don't forget to submit your proposal,0.23822864744162112,0
 92,Congratulations! You've been selected!,0.20450476931376171,0
 93,Please confirm your meeting time,0.12180650903983864,0
-94,Your order has been shipped,0.64858703850327,1
+94,Your order has been shipped,0.64858703850327,0
 95,Claim your bonus now!,0.9573162728535966,1
 96,Let's review the project timeline,0.1694609128742247,0
 97,You are a lucky winner!,0.42029457169479456,0

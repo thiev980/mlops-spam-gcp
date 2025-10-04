@@ -1,0 +1,12 @@
+{
+  "threshold": 0.7138449828829225,
+  "suggested_from": "2025-10-04",
+  "mode": "precision",
+  "target_precision": 0.95,
+  "target_recall": 0.9,
+  "target_fpr": 0.001,
+  "precision": 1.0,
+  "recall": 0.2318840579710145,
+  "f1": 0.3764705882352941,
+  "fpr": 0.0
+}

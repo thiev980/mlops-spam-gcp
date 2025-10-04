@@ -12,7 +12,7 @@ if not MODEL_PATH.exists():
 with MODEL_PATH.open("rb") as f:
     model = pickle.load(f)
 
-BEST_THRESHOLD = 0.620  # keep your chosen threshold
+BEST_THRESHOLD = 0.450  # keep your chosen threshold
 
 class PredictRequest(BaseModel):
     text: str

@@ -1,4 +1,0 @@
-id,text,probability_spam,prediction
-1,Win a FREE prize now!!!,0.9897548724224555,spam
-2,"Hey, meeting at 3pm?",0.060574427825112256,ham
-3,Limited time offer! Click here,0.40284868099182264,ham

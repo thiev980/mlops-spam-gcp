@@ -127,3 +127,17 @@ services:
       - ./data:/opt/airflow/data
       - ./logs:/opt/airflow/logs
     command: celery worker
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: airflow-grafana
+    depends_on:
+      postgres: { condition: service_healthy }
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
