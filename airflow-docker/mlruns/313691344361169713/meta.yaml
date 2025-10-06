@@ -1,0 +1,6 @@
+artifact_location: file:///opt/airflow/mlruns/313691344361169713
+creation_time: 1759610738615
+experiment_id: '313691344361169713'
+last_update_time: 1759610738615
+lifecycle_stage: active
+name: spam_tuning

@@ -40,7 +40,6 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
     #user: "${AIRFLOW_UID:-50000}:0"
     volumes:
       - ./dags:/opt/airflow/dags
@@ -66,7 +65,6 @@ services:
       - AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=Europe/Zurich
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
     user: "${AIRFLOW_UID:-50000}:0"
     ports: ["8080:8080"]
     volumes:
@@ -74,6 +72,7 @@ services:
       - ./models:/opt/airflow/models
       - ./data:/opt/airflow/data
       - ./logs:/opt/airflow/logs
+      - ./mlruns:/opt/airflow/mlruns 
     command: webserver
 
   airflow-scheduler:
@@ -89,7 +88,6 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
       - LLM_PROVIDER=openai
       - LLM_ENDPOINT=https://api.openai.com/v1/chat/completions
       - LLM_MODEL=gpt-4o-mini
@@ -100,6 +98,7 @@ services:
       - ./models:/opt/airflow/models
       - ./data:/opt/airflow/data
       - ./logs:/opt/airflow/logs
+      - ./mlruns:/opt/airflow/mlruns 
     command: scheduler
 
   airflow-worker:
@@ -115,7 +114,6 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}
       - AIRFLOW__CELERY__RESULT_BACKEND=${AIRFLOW__CELERY__RESULT_BACKEND}
-      - _PIP_ADDITIONAL_REQUIREMENTS=pandas>=2.2 numpy>=2,<3 scikit-learn>=1.4,<2 scipy>=1.11 psycopg2-binary redis matplotlib
       - LLM_PROVIDER=openai
       - LLM_ENDPOINT=https://api.openai.com/v1/chat/completions
       - LLM_MODEL=gpt-4o-mini
@@ -126,6 +124,7 @@ services:
       - ./models:/opt/airflow/models
       - ./data:/opt/airflow/data
       - ./logs:/opt/airflow/logs
+      - ./mlruns:/opt/airflow/mlruns 
     command: celery worker
 
   grafana:
@@ -141,3 +140,15 @@ services:
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana-data:/var/lib/grafana   # <--- persistente Datenbank
+
+  mlflow-ui:
+    image: ghcr.io/mlflow/mlflow:v2.14.1
+    container_name: mlflow-ui
+    command: mlflow ui --backend-store-uri file:/mlruns --host 0.0.0.0 --port 5002
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./mlruns:/mlruns
+    depends_on:
+        - airflow-scheduler

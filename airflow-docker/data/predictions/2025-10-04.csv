@@ -1,151 +1,151 @@
 id,text,proba_spam,prediction
-1,Congratulations! You've won a gift card,0.30865335221721113,0
-2,Don't forget our lunch date tomorrow,0.3174793956619694,0
-3,Claim your free trial now,0.9358416704093935,1
-4,Can we reschedule our call?,0.20450476931376171,0
-5,"Your account has been compromised, act now",0.25184161141093486,0
-6,Meeting notes are attached,0.20450476931376171,0
-7,Get rich quick with this investment,0.17175950062993364,0
-8,Let's finalize the project details,0.1246724629678773,0
-9,You've been selected for a special offer,0.5977312053771033,0
-10,Reminder: Doctor's appointment on Friday,0.15203522731192912,0
-11,Unlock your potential with this course,0.20450476931376171,0
-12,Can you send me the report by EOD?,0.2859430075838495,0
-13,"Limited time offer, act fast!",0.25549292515598293,0
-14,Looking forward to our collaboration,0.23808666950290017,0
-15,Your subscription is expiring soon,0.12280926227455212,0
-16,Let's catch up next week,0.22129178466838043,0
-17,You have a new message from HR,0.48223808828125736,0
-18,"Win a free vacation, click here!",0.9111072581935608,1
-19,Please review the attached document,0.2332589629639913,0
-20,Exclusive deal just for you!,0.19025267702401136,0
-21,Can we discuss the budget tomorrow?,0.1361807866354158,0
-22,Your invoice is ready for payment,0.19188071510987004,0
-23,"Earn money from home, no experience needed!",0.11959899511948101,0
-24,Let's meet to discuss your feedback,0.09202434950595939,0
-25,Congratulations! You've been chosen!,0.24874682448812693,0
-26,Please confirm your attendance at the meeting,0.15939629712994016,0
-27,Get paid for taking surveys online!,0.2492196853868193,0
-28,Reminder: Project deadline is next week,0.28079198311414677,0
-29,You have a chance to win big!,0.5559540823188206,0
-30,Can you help me with this task?,0.40612253119732417,0
-31,Your package has been shipped,0.20450476931376171,0
-32,Join our exclusive membership today!,0.293590606967316,0
-33,Let's review the agenda for tomorrow,0.14953636157661904,0
-34,You've been selected for a free gift!,0.834487990186068,1
-35,Please send me the updated schedule,0.48131728415390623,0
-36,Act now to secure your spot!,0.17508811535183325,0
-37,Looking forward to your response,0.23808666950290017,0
-38,Get a free trial of our service!,0.7138449828829225,1
-39,Can we discuss your performance review?,0.22041041733501282,0
-40,Your feedback is important to us,0.20450476931376171,0
-41,Don't miss out on this amazing deal!,0.1618860180386012,0
-42,Let's finalize the details for the event,0.14958652946894382,0
-43,You've won a cash prize!,0.9359336734500822,1
-44,Please find the meeting link attached,0.5241101445105107,0
-45,Get rich with this simple trick!,0.19512283670693548,0
-46,Can you confirm the meeting time?,0.12180650903983864,0
-47,Your order has been confirmed,0.64858703850327,0
-48,Claim your free gift today!,0.9494113243006909,1
-49,Looking forward to our discussion,0.23808666950290017,0
-50,Don't miss this once-in-a-lifetime opportunity!,0.16134914408620402,0
-51,Congratulations! You've won a gift card,0.30865335221721113,0
-52,Don't forget our lunch date tomorrow,0.3174793956619694,0
-53,Claim your free vacation package now,0.9907663784678273,1
-54,Can we reschedule our call for next week?,0.44755388208980335,0
-55,Limited time offer: Buy one get one free!,0.6317130174765756,0
-56,Project deadline is next Friday,0.1509096721557398,0
-57,Your invoice is ready for review,0.2609177873052512,0
-58,Get rich quick with this simple trick!,0.17175950062993364,0
-59,Let's finalize the report by Monday,0.11957323374915642,0
-60,Exclusive deal just for you!,0.19025267702401136,0
-61,Reminder: Doctor's appointment on Thursday,0.15577866438844393,0
-62,Unlock the secrets to financial freedom,0.19802421096886702,0
-63,Meeting notes from yesterday's discussion,0.14932776129460315,0
-64,Act now! Limited stock available!,0.16978389828056387,0
-65,Can you send me the presentation slides?,0.48131728415390623,0
-66,You've been selected for a special offer!,0.5977312053771033,0
-67,Don't forget to submit your timesheet,0.23822864744162112,0
-68,Your account has been compromised!,0.35759982840156784,0
-69,Let's catch up over coffee next week,0.22129178466838043,0
-70,Congratulations! You've been chosen!,0.24874682448812693,0
-71,Please review the attached document,0.2332589629639913,0
-72,Win a brand new smartphone today!,0.7572377047239653,1
-73,Can you confirm our meeting time?,0.12180650903983864,0
-74,Special promotion: 50% off all items!,0.4602483239168134,0
-75,Looking forward to your feedback on the draft,0.23808666950290017,0
-76,Your subscription has been renewed,0.20450476931376171,0
-77,Don't miss out on this amazing deal!,0.1618860180386012,0
-78,Please find the agenda for our meeting,0.20450476931376171,0
-79,You've won a free cruise!,0.9370046939236387,1
-80,Let's discuss the new project next week,0.3796074080557723,0
-81,Claim your cash prize now!,0.9887233541826923,1
-82,Reminder: Team building event on Friday,0.21112106765106828,0
-83,Unlock your potential with this course!,0.20450476931376171,0
-84,Can you help me with this task?,0.40612253119732417,0
-85,Your feedback is important to us,0.20450476931376171,0
-86,Get paid to work from home!,0.07855451624677615,0
-87,Looking forward to our collaboration,0.23808666950290017,0
-88,You've been selected for a survey!,0.2000642723050973,0
-89,Please confirm your attendance at the meeting,0.15939629712994016,0
-90,Act fast! This offer expires soon!,0.24544738231892782,0
-91,Let's schedule a follow-up call,0.3219164700506001,0
-92,Congratulations on your new job!,0.40487830948423253,0
-93,Win a luxury car! Click here!,0.5128559536078031,0
-94,Thanks for your prompt response,0.23167836272754233,0
-95,Your chance to win big is here!,0.5559540823188206,0
-96,Please send me the updated figures,0.48131728415390623,0
-97,Don't miss this exclusive invitation!,0.16134914408620402,0
-98,Can we discuss this further?,0.17573205567343556,0
-99,Your payment is overdue!,0.19188071510987004,0
-100,Join our affiliate program and earn money!,0.2762156824646731,0
-101,Congratulations! You've won a gift card,0.30865335221721113,0
-102,Don't forget our lunch date tomorrow,0.3174793956619694,0
-103,Claim your free trial today,0.9064102805015886,1
-104,Meeting agenda attached for review,0.2609177873052512,0
-105,"Your account has been compromised, act now",0.25184161141093486,0
-106,Reminder: Project deadline is next week,0.28079198311414677,0
-107,"Limited time offer, buy now!",0.23619432468164053,0
-108,Can we reschedule our call?,0.20450476931376171,0
-109,You've been selected for a special promotion,0.43571462941246153,0
-110,Please review the attached document,0.2332589629639913,0
-111,"Earn money from home, sign up today!",0.12809888818200513,0
-112,Let's discuss the new marketing strategy,0.35902118993839865,0
-113,Your subscription is expiring soon,0.12280926227455212,0
-114,Final reminder for the workshop registration,0.2684907322202125,0
-115,"Get paid to take surveys, join now!",0.38304199233543057,0
-116,Can you send me the report by EOD?,0.2859430075838495,0
-117,"Unlock exclusive deals, click here!",0.32976388204757784,0
-118,Thanks for your prompt response,0.23167836272754233,0
-119,Act fast! Limited stock available,0.18002356598291613,0
-120,Let's finalize the budget proposal,0.1427554623204378,0
-121,Your invoice is ready for payment,0.19188071510987004,0
-122,Congratulations! You've been chosen for a prize,0.6750582519440563,0
-123,Please confirm your attendance at the meeting,0.15939629712994016,0
-124,Get rich quick with this simple method!,0.16858658271585794,0
-125,Can you provide feedback on the presentation?,0.20450476931376171,0
-126,Your loan application has been approved!,0.2922667286704875,0
-127,Looking forward to our collaboration,0.23808666950290017,0
-128,Exclusive access to our VIP event!,0.37686880297358993,0
-129,Please find the minutes from our last meeting,0.20450476931376171,0
-130,"Win a free vacation, enter now!",0.9438132918021078,1
-131,Let's touch base next week,0.21295361749545377,0
-132,Your package has been shipped,0.20450476931376171,0
-133,Don't miss out on this amazing deal!,0.1618860180386012,0
-134,Can you help me with this task?,0.40612253119732417,0
-135,You've been selected for a cash prize!,0.9359336734500822,1
-136,Reminder: Team building event this Friday,0.21112106765106828,0
-137,Get a free gift with your purchase!,0.834487990186068,1
-138,Please review the attached proposal,0.2609177873052512,0
-139,Your feedback is important to us!,0.20450476931376171,0
-140,Claim your bonus today!,0.852480190734432,1
-141,Let's schedule a follow-up meeting,0.3219164700506001,0
-142,Your account has been upgraded!,0.35759982840156784,0
-143,Looking forward to your insights,0.23808666950290017,0
-144,Act now for a special discount!,0.28733023780055245,0
-145,Please confirm the meeting time,0.12180650903983864,0
-146,You've won a free iPhone!,0.9370046939236387,1
-147,Can you send me the latest updates?,0.6901484924528111,0
-148,Don't miss this once-in-a-lifetime opportunity!,0.16134914408620402,0
-149,Let's catch up over coffee next week,0.22129178466838043,0
-150,Your order has been confirmed,0.64858703850327,0
+1,Congratulations! You've won a gift card,0.9947357895138359,1
+2,Don't forget our lunch date tomorrow,0.009270513341560772,0
+3,Claim your free trial now,0.997925129525324,1
+4,Can we reschedule our call?,0.0070789530666603585,0
+5,"Your account has been compromised, act now",0.997795729430151,1
+6,Meeting notes are attached,0.012224818981648301,0
+7,Get rich quick with this investment,0.9918257282830172,1
+8,Let's finalize the project details,0.0015246786239439519,0
+9,You've been selected for a special offer,0.9975654841285077,1
+10,Reminder: Doctor's appointment on Friday,0.006499392628356798,0
+11,Unlock your potential with this course,0.990141782839465,1
+12,Can you send me the report by EOD?,0.006628786631863319,0
+13,"Limited time offer, act fast!",0.9959087042026826,1
+14,Looking forward to our collaboration,0.005144398095251148,0
+15,Your subscription is expiring soon,0.9686086283400467,1
+16,Let's catch up next week,0.006454625568601779,0
+17,You have a new message from HR,0.22280135952216296,0
+18,"Win a free vacation, click here!",0.9974383133296143,1
+19,Please review the attached document,0.0026820126402382067,0
+20,Exclusive deal just for you!,0.9942209959654129,1
+21,Can we discuss the budget tomorrow?,0.0016373079531106477,0
+22,Your invoice is ready for payment,0.0071858934180121445,0
+23,"Earn money from home, no experience needed!",0.9873678746641901,1
+24,Let's meet to discuss your feedback,0.013277880600378726,0
+25,Congratulations! You've been chosen!,0.9899543736262537,1
+26,Please confirm your attendance at the meeting,0.001194075666448806,0
+27,Get paid for taking surveys online!,0.9904813875422329,1
+28,Reminder: Project deadline is next week,0.001126537508746089,0
+29,You have a chance to win big!,0.9849578361850674,1
+30,Can you help me with this task?,0.016508863402607776,0
+31,Your package has been shipped,0.019458995726482162,0
+32,Join our exclusive membership today!,0.9932125189091963,1
+33,Let's review the agenda for tomorrow,0.0021556315715536324,0
+34,You've been selected for a free gift!,0.9975746031166794,1
+35,Please send me the updated schedule,0.002891056569019074,0
+36,Act now to secure your spot!,0.9879980084214275,1
+37,Looking forward to your response,0.0051490299039718985,0
+38,Get a free trial of our service!,0.987636278922641,1
+39,Can we discuss your performance review?,0.003099664158124332,0
+40,Your feedback is important to us,0.03598785214664914,0
+41,Don't miss out on this amazing deal!,0.9846585021441945,1
+42,Let's finalize the details for the event,0.0041603938544986195,0
+43,You've won a cash prize!,0.9949744607434149,1
+44,Please find the meeting link attached,0.001014230555353039,0
+45,Get rich with this simple trick!,0.9907755923208528,1
+46,Can you confirm the meeting time?,0.0053529505262005835,0
+47,Your order has been confirmed,0.3769762647770147,0
+48,Claim your free gift today!,0.9979667969237526,1
+49,Looking forward to our discussion,0.011809970395290885,0
+50,Don't miss this once-in-a-lifetime opportunity!,0.985080212022226,1
+51,Congratulations! You've won a gift card,0.9947357895138359,1
+52,Don't forget our lunch date tomorrow,0.009270513341560772,0
+53,Claim your free vacation package now,0.9899269835709049,1
+54,Can we reschedule our call for next week?,0.002520650387917705,0
+55,Limited time offer: Buy one get one free!,0.9960034522328143,1
+56,Project deadline is next Friday,0.005265974541762992,0
+57,Your invoice is ready for review,0.00847545990345517,0
+58,Get rich quick with this simple trick!,0.9925899235951846,1
+59,Let's finalize the report by Monday,0.0059308141243864096,0
+60,Exclusive deal just for you!,0.9942209959654129,1
+61,Reminder: Doctor's appointment on Thursday,0.012935059115138552,0
+62,Unlock the secrets to financial freedom,0.9617776070917067,1
+63,Meeting notes from yesterday's discussion,0.017835978136582508,0
+64,Act now! Limited stock available!,0.9953001460328035,1
+65,Can you send me the presentation slides?,0.0067629052580963625,0
+66,You've been selected for a special offer!,0.9975654841285077,1
+67,Don't forget to submit your timesheet,0.025169196503723065,0
+68,Your account has been compromised!,0.9809698449083163,1
+69,Let's catch up over coffee next week,0.005042529090160901,0
+70,Congratulations! You've been chosen!,0.9899543736262537,1
+71,Please review the attached document,0.0026820126402382067,0
+72,Win a brand new smartphone today!,0.98885146408028,1
+73,Can you confirm our meeting time?,0.02037222994527986,0
+74,Special promotion: 50% off all items!,0.979014800117322,1
+75,Looking forward to your feedback on the draft,0.00253959244274422,0
+76,Your subscription has been renewed,0.05750925634159313,0
+77,Don't miss out on this amazing deal!,0.9846585021441945,1
+78,Please find the agenda for our meeting,0.0038649555901155894,0
+79,You've won a free cruise!,0.996890716424854,1
+80,Let's discuss the new project next week,0.0005046156295144788,0
+81,Claim your cash prize now!,0.994323083089148,1
+82,Reminder: Team building event on Friday,0.01113085889237565,0
+83,Unlock your potential with this course!,0.990141782839465,1
+84,Can you help me with this task?,0.016508863402607776,0
+85,Your feedback is important to us,0.03598785214664914,0
+86,Get paid to work from home!,0.9935010053458523,1
+87,Looking forward to our collaboration,0.005144398095251148,0
+88,You've been selected for a survey!,0.9990325387539185,1
+89,Please confirm your attendance at the meeting,0.001194075666448806,0
+90,Act fast! This offer expires soon!,0.9915427630388646,1
+91,Let's schedule a follow-up call,0.016619550489708913,0
+92,Congratulations on your new job!,0.08061842537375555,0
+93,Win a luxury car! Click here!,0.9886254399995466,1
+94,Thanks for your prompt response,0.01227203521453059,0
+95,Your chance to win big is here!,0.9836430523592593,1
+96,Please send me the updated figures,0.0031614326187443917,0
+97,Don't miss this exclusive invitation!,0.9945982347317887,1
+98,Can we discuss this further?,0.022214128953270015,0
+99,Your payment is overdue!,0.027292862787424974,0
+100,Join our affiliate program and earn money!,0.9860928019823906,1
+101,Congratulations! You've won a gift card,0.9947357895138359,1
+102,Don't forget our lunch date tomorrow,0.009270513341560772,0
+103,Claim your free trial today,0.9969241616943488,1
+104,Meeting agenda attached for review,0.0051976088777530615,0
+105,"Your account has been compromised, act now",0.997795729430151,1
+106,Reminder: Project deadline is next week,0.001126537508746089,0
+107,"Limited time offer, buy now!",0.9935605504237319,1
+108,Can we reschedule our call?,0.0070789530666603585,0
+109,You've been selected for a special promotion,0.9957229811854059,1
+110,Please review the attached document,0.0026820126402382067,0
+111,"Earn money from home, sign up today!",0.9877133724056061,1
+112,Let's discuss the new marketing strategy,0.006501007537906959,0
+113,Your subscription is expiring soon,0.9686086283400467,1
+114,Final reminder for the workshop registration,0.003166293624092355,0
+115,"Get paid to take surveys, join now!",0.999855992015529,1
+116,Can you send me the report by EOD?,0.006628786631863319,0
+117,"Unlock exclusive deals, click here!",0.9917564633116126,1
+118,Thanks for your prompt response,0.01227203521453059,0
+119,Act fast! Limited stock available,0.9896127601234387,1
+120,Let's finalize the budget proposal,0.005673179378558299,0
+121,Your invoice is ready for payment,0.0071858934180121445,0
+122,Congratulations! You've been chosen for a prize,0.9914253296814192,1
+123,Please confirm your attendance at the meeting,0.001194075666448806,0
+124,Get rich quick with this simple method!,0.9931394727324578,1
+125,Can you provide feedback on the presentation?,0.017977565745447056,0
+126,Your loan application has been approved!,0.9488955839185051,1
+127,Looking forward to our collaboration,0.005144398095251148,0
+128,Exclusive access to our VIP event!,0.9824821423079422,1
+129,Please find the minutes from our last meeting,0.012186933636247335,0
+130,"Win a free vacation, enter now!",0.9990694340933259,1
+131,Let's touch base next week,0.003372661038625814,0
+132,Your package has been shipped,0.019458995726482162,0
+133,Don't miss out on this amazing deal!,0.9846585021441945,1
+134,Can you help me with this task?,0.016508863402607776,0
+135,You've been selected for a cash prize!,0.992573087238715,1
+136,Reminder: Team building event this Friday,0.020935866920158235,0
+137,Get a free gift with your purchase!,0.9964688258569719,1
+138,Please review the attached proposal,0.0019006912269625687,0
+139,Your feedback is important to us!,0.03598785214664914,0
+140,Claim your bonus today!,0.9825233019833843,1
+141,Let's schedule a follow-up meeting,0.005815906448984366,0
+142,Your account has been upgraded!,0.9792700329298986,1
+143,Looking forward to your insights,0.016496133916518756,0
+144,Act now for a special discount!,0.9983312326916511,1
+145,Please confirm the meeting time,0.0032039644029928063,0
+146,You've won a free iPhone!,0.9978499869217561,1
+147,Can you send me the latest updates?,0.008934060618148677,0
+148,Don't miss this once-in-a-lifetime opportunity!,0.985080212022226,1
+149,Let's catch up over coffee next week,0.005042529090160901,0
+150,Your order has been confirmed,0.3769762647770147,0

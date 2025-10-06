@@ -11,7 +11,8 @@ DATA_DIR    = Path("/opt/airflow/data")
 INCOMING    = DATA_DIR / "incoming"
 PRED_DIR    = DATA_DIR / "predictions"
 PRED_LATEST = DATA_DIR / "predictions_latest.csv"
-MODEL_PATH  = Path("/opt/airflow/models/logreg_spam_pipeline.pkl")
+#MODEL_PATH  = Path("/opt/airflow/models/logreg_spam_pipeline.pkl")
+MODEL_PATH = Path("/opt/airflow/models/model_current.pkl")  # statt fester alter Datei
 THRESH_PATH = DATA_DIR / "threshold.json"
 
 PRED_DIR.mkdir(parents=True, exist_ok=True)

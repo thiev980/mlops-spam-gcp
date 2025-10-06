@@ -1,0 +1,15 @@
+artifact_uri: file:///opt/airflow/mlruns/313691344361169713/f1346f316bfc404abdc3dec2f118b1ae/artifacts
+end_time: 1759760897140
+entry_point_name: ''
+experiment_id: '313691344361169713'
+lifecycle_stage: active
+run_id: f1346f316bfc404abdc3dec2f118b1ae
+run_name: optuna_search
+run_uuid: f1346f316bfc404abdc3dec2f118b1ae
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1759760896220
+status: 3
+tags: []
+user_id: default
