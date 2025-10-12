@@ -1,0 +1,122 @@
+id,text,proba_spam,prediction
+74,Your account needs verification. Click here to secure it!,0.9688448,1
+61,Meeting rescheduled to next week. Check your calendar!,0.0051411306,0
+12,Hey! Are we still on for lunch tomorrow?,0.0026133696,0
+119,Just a reminder about the presentation on Thursday. Let’s finalize our slides!,0.00017880328,0
+75,Hey! Just wanted to see how you're doing!,0.02547677,0
+41,Can you please send me the final draft by tomorrow?,8.260643e-05,0
+83,Looking forward to our chat later!,0.06468595,0
+85,Don't forget to submit your feedback on the project!,0.0061049643,0
+80,Can you confirm the meeting time for tomorrow?,0.0006961975,0
+117,Your payment is due for the invoice sent last week. Please pay to avoid penalties.,0.15709269,0
+43,Looking forward to our meeting next week!,0.0013225853,0
+97,Hey! Just checking in on the project status!,0.0011637072,0
+93,Reminder: Team meeting at 10 AM on Thursday!,0.0003152965,0
+108,"Just a heads up, the deadline for the project is next Friday. Let’s stay on track!",1.3771417e-05,0
+134,Just a quick note to confirm our meeting on Friday at 3 PM.,0.00022193971,0
+31,Can you send me the updated schedule for next week?,9.5327065e-05,0
+115,Urgent: Your account needs verification[.] Click here to secure it!,0.9951645,1
+98,Your invoice is due soon. Please make the payment!,0.22604789,0
+96,Your subscription is about to expire! Renew now!,0.99910957,1
+18,Can you confirm if you received my last email? Thanks!,0.047310833,0
+107,Congrats! You’ve won a $50 gift card! Claim it at winbig[.]com!,0.28423846,0
+125,Just finished the report! I’ll send it over for your review shortly.,0.00019520138,0
+131,Congratulations! You’ve been selected for an exclusive offer! Click here!,0.99916947,1
+15,Urgent: Your account needs verification. Click here to secure it!,0.9951645,1
+40,Your account has been compromised. Click here to secure it!,0.9859555,1
+101,Your invoice for the recent purchase is overdue. Please pay ASAP to avoid late fees.,0.17310913,0
+68,Your account is eligible for an upgrade! Click here!,0.9403435,1
+87,"Hey, can you send me the slides from yesterday's meeting?",0.00027275571,0
+28,You've received a new invoice. Please review and pay it!,0.014882506,0
+53,Reminder: Our meeting is at 3 PM tomorrow. Don't forget!,0.00020143855,0
+118,Congratulations! You’ve been pre-approved for a loan! Click here to apply!,0.65599996,0
+102,Congratulations! You’ve been selected for a chance to win a luxury vacation! Click here!,0.784526,0
+8,Just wanted to say great job on the presentation!,0.00040883,0
+121,Excited for the upcoming conference! Let’s discuss our agenda soon.,0.0054739686,0
+103,Hey! Just checking in on the project status. Let me know if you need anything!,0.0003662336,0
+67,Can you send me the report by EOD? Thanks!,0.00042970976,0
+114,Your subscription is about to expire. Renew now to keep enjoying our services!,0.012912533,0
+32,Your account is eligible for a special promotion! Check it out!,0.027666813,0
+86,Congratulations! You've been chosen for an exclusive offer!,0.99681574,1
+38,You've won a $500 gift card! Claim it at winbig[.]com!,0.86025375,0
+45,Just checking in on the status of the project. Any updates?,0.0009109019,0
+58,Urgent: Your account has been compromised! Verify now!,0.98232967,1
+6,Can you send me the report by end of day? Thanks!,0.00045869686,0
+111,You have a new delivery from Amazon arriving tomorrow!,0.8482868,0
+51,"Hey, did you see the new updates for the project?",0.001362446,0
+2,Cοngrɑtuⅼɑtіοns! Yοu'vе bееn sеⅼеϲtеd fοr ɑ ϲhɑnϲе tο wіn ɑ nеw іPhοnе!,0.73991543,0
+65,Just a reminder about the team outing this Friday!,0.0018699318,0
+39,Reminder: The deadline for submissions is this Friday!,0.0013938792,0
+123,Your package is scheduled for delivery tomorrow. Track it here!,0.008007145,0
+11,Your account has been compromised. Please reset your password immediately!,0.91973716,1
+30,Congratulations! You've won a free vacation! Click to claim!,0.3285507,0
+104,Your parcel is waiting for customs clearance. Pay the fees to release it!,0.34679157,0
+13,You've won 4 $100 gift c4rd! Click here to cl4im your prize!,0.95506227,1
+23,Your parcel is ready for pickup at the post office. Check it out!,0.0036985665,0
+91,Looking forward to the weekend! Any plans?,0.005055427,0
+17,Congratulations! You’ve been pre-approved for a loan!,0.48777324,0
+132,Hey! Can you send me the updated figures for the report? Thanks!,0.00011579605,0
+24,You've been selected for an exclusive offer! Click here!,0.9994168,1
+77,"You've received a new login attempt. If this wasn't you, secure your account!",0.95841295,1
+14,The meeting has been rescheduled to Friday at 2 PM.,0.002088167,0
+4,Reminder: Team meeting tomorrow at 3 PM. Don't forget!,0.0002706097,0
+10,Don't forget the deadline for the project submission is next week!,9.692602e-05,0
+16,Your subscription will renew automatically next month. No action needed!,0.13857874,0
+122,You have a new message from your support team. Check it out!,0.0918439,0
+110,Looking forward to the game this weekend! Let’s meet at the usual spot!,0.00039833764,0
+92,Your account is at risk! Click here to secure it!,0.96075463,1
+42,Congratulations! You've been selected for a chance to win a new car!,0.94503844,1
+55,Just checking in! How was your weekend? 😊,0.038993828,0
+5,You've received a new message from your bank. Log in to view it!,0.9038355,1
+64,You've received a new message from your bank. Log in to view!,0.6282651,0
+81,Your package is on the way! Track it here: tracking[.]com,0.00035177715,0
+126,You’ve won a $100 gift card! Claim it at winbig[.]com!,0.9483229,1
+79,Congratulations! You've been selected for a gift card!,0.9744769,1
+116,Hey! Are we still on for lunch tomorrow? Let me know!,0.0004400243,0
+94,Congratulations! You've won a $100 gift card! Claim it now!,0.056051936,0
+99,Looking forward to seeing everyone at the meeting!,0.0012878684,0
+19,Your 4ccount h4s been tempor4rily suspended[.] Verify your identity!,0.9196509,1
+113,Don’t miss out on our exclusive offer! Sign up for our newsletter today!,0.010581386,0
+1,Hey! Just checking in on the project timeline. Any updates?,0.0009711528,0
+124,Claim your free trial of our premium service today!,0.05050348,0
+129,Reminder: The deadline for the project submission is approaching!,0.003105009,0
+26,Your account has been flagged for suspicious activity. Verify now!,0.6083111,0
+95,Can you please review the attached document? Thanks!,9.155003e-05,0
+52,Congratulations! You've won a free vacation! Click here to claim!,0.025032334,0
+105,Reminder: Team meeting tomorrow at 2 PM. Don’t forget to bring your reports!,4.879716e-05,0
+135,Yοur ɑϲϲοunt nееds іmmеdіɑtе ɑttеntіοn. Cⅼіϲk hеrе tο rеsοⅼvе іssuеs!,0.73991543,0
+78,Reminder: Team lunch at noon on Friday!,0.006225769,0
+29,Reminder: Team lunch on Thursday at noon!,0.0027216116,0
+100,You've been selected for a chance to win a new phone!,0.9816549,1
+54,Your invoice is overdue. Please pay immediately to avoid penalties.,0.95282,1
+20,Looking forward to the game this weekend! Go team!,0.0037190467,0
+82,You've won a free trial of our premium service!,0.27183414,0
+56,You've been selected for a special offer! Act now!,0.98178035,1
+89,Just a quick note to say great job on the presentation!,0.00022073701,0
+57,Your package is ready for pickup at the post office.,0.00025856934,0
+127,Looking forward to the team outing next week! Don’t forget to RSVP!,0.0014789805,0
+35,Looking forward to our project kickoff meeting next week!,0.0013611789,0
+7,Your parcel is stuck in customs. Pay the fees to release it!,0.977099,1
+33,Just wanted to confirm our meeting for tomorrow at 10 AM.,0.0012540049,0
+46,You've received a new message from support. Please log in to view.,0.21593964,0
+76,Your invoice is ready for review. Please check it!,0.10054192,0
+36,Your invoice is overdue. Please make the payment to avoid penalties.,0.5014282,0
+73,Can we reschedule our meeting to next week?,0.00044889806,0
+25,Hey! Can you help me with the budget report?,0.0008782056,0
+3,Your invoice for the recent purchase is overdue. Please pay ASAP!,0.0312801,0
+9,Claim your free gift card now! Visit winbig[.]com to get started!,0.6140726,0
+59,Don't forget to submit your timesheets by Friday!,0.010420659,0
+21,You've got a new message from support. Please log in to view.,0.17300858,0
+90,You've received a new message from your service provider. Log in to view!,0.6222757,0
+34,You've got a new message from your bank. Log in to view it!,0.707359,0
+109,Your account has been compromised​.​ Please verify your identity immediately!,0.09243828,0
+27,Great job on the last project! Let's discuss the next steps.,3.0353951e-05,0
+133,Your parcel is stuck in customs​.​ Pay the fees to release it!,0.977099,1
+37,Hey! Did you see the latest updates on the project?,0.00012416662,0
+50,Congratulations! You've won a free gift card! Click to claim!,0.0022346526,0
+60,Claim your free gift card! Visit winbig[.]com now!,0.040230256,0
+71,Don't forget to register for the conference next month!,0.0066239247,0
+112,Your account has been temporarily suspended. Click here to restore access!,0.80819154,0
+49,Hey! Can we reschedule our meeting for next week?,0.00033848698,0
+22,Just a reminder about the upcoming deadline for the project!,0.001470817,0
+88,Your parcel is awaiting payment for customs fees. Act now!,0.71198934,0

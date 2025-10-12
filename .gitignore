@@ -1,4 +1,4 @@
-# Python
+# ───────────── Python ─────────────
 __pycache__/
 *.pyc
 *.pyo
@@ -6,40 +6,58 @@ __pycache__/
 *.sqlite3
 *.db
 
-# Virtual Environments
+# ───────────── Virtual Environments ─────────────
 .venv/
 venv/
 env/
 
-# Jupyter Notebook checkpoints
+# ───────────── Jupyter ─────────────
 .ipynb_checkpoints/
 
-# Logs
+# ───────────── Logs ─────────────
 *.log
-logs/
 *.out
 *.err
+logs/
 
-# OS
+# ───────────── OS junk ─────────────
 .DS_Store
 Thumbs.db
 
-# Airflow
-airflow-docker/db/airflow.db
+# ───────────── Airflow & MLflow ─────────────
 airflow.db
-airflow-docker/.env
-airflow-docker/pgdata/
-airflow-docker/logs/
-airflow-docker/docker-compose_sqlite.yml
-airflow-docker/docker-compose_postgres.yml
 *.pid
 *.sqlite
 */airflow.cfg
 */unittests.cfg
 
-# Docker
-*.pid
+# Lokale Airflow-/MLflow-Verzeichnisse (prod & dev)
+airflow-docker/.env
+airflow-docker/db/
+airflow-docker/logs/
+airflow-docker/pgdata/
+airflow-docker/*-prod/
+airflow-docker/grafana-data/
+airflow-docker/mlartifacts-prod/
+airflow-docker/pgdata-prod/
+airflow-docker/logs-prod/
+
+# ───────────── Docker ─────────────
 *.sock
 
-# Cache
+# ───────────── Cache ─────────────
 .cache/
+
+# ───────────── Environment Files (Secrets) ─────────────
+.env
+.env.*
+!.env.example
+
+# ───────────── Local runtime data (prod mounts) ─────────────
+pgdata-prod/
+mlartifacts-prod/
+logs-prod/
+data-prod/
+models-prod/
+grafana-data/
+postgres-init/

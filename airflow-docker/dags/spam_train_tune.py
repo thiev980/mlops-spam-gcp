@@ -182,7 +182,7 @@ def tune_and_train():
         elif model_type == "linear_svc":
             base = LinearSVC(C=p["svm_C"])
             # Kalibrieren, damit wir predict_proba haben
-            clf = CalibratedClassifierCV(base_estimator=base, method="sigmoid", cv=3)
+            clf = CalibratedClassifierCV(estimator=base, method="sigmoid", cv=3)
         else:
             clf = xgb.XGBClassifier(
                 n_estimators=p["xgb_n_estimators"],

@@ -1,0 +1,154 @@
+name: mlops-spam-dev
+
+networks:
+  airflow_net_dev:
+    name: airflow_net_dev
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+    networks: [airflow_net_dev]
+    volumes:
+      - ./airflow-docker/pgdata-dev:/var/lib/postgresql/data
+      - ./airflow-docker/postgres-init:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:7
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "6379:6379"
+    networks: [airflow_net_dev]
+
+  airflow-init:
+    image: my-airflow:2.9.2
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW__CELERY__BROKER_URL}
+      AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND}
+    command: ["bash","-lc","airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true"]
+    networks: [airflow_net_dev]
+    volumes:
+      - ./airflow-docker/dags:/opt/airflow/dags
+      - ./airflow-docker/models-dev:/opt/airflow/models
+      - ./airflow-docker/data-dev:/opt/airflow/data
+      - ./airflow-docker/logs-dev:/opt/airflow/logs
+
+  airflow-web:
+    image: my-airflow:2.9.2
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      airflow-init: { condition: service_completed_successfully }
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Europe/Zurich
+      AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW__CELERY__BROKER_URL}
+      AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND}
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    command: webserver
+    ports: ["8080:8080"]
+    networks: [airflow_net_dev]
+    volumes:
+      - ./airflow-docker/dags:/opt/airflow/dags
+      - ./airflow-docker/models-dev:/opt/airflow/models
+      - ./airflow-docker/data-dev:/opt/airflow/data
+      - ./airflow-docker/logs-dev:/opt/airflow/logs
+
+  airflow-scheduler:
+    image: my-airflow:2.9.2
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      airflow-init: { condition: service_completed_successfully }
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW__CELERY__BROKER_URL}
+      AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND}
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    command: scheduler
+    networks: [airflow_net_dev]
+    volumes:
+      - ./airflow-docker/dags:/opt/airflow/dags
+      - ./airflow-docker/models-dev:/opt/airflow/models
+      - ./airflow-docker/data-dev:/opt/airflow/data
+      - ./airflow-docker/logs-dev:/opt/airflow/logs
+
+  airflow-worker:
+    image: my-airflow:2.9.2
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      airflow-init: { condition: service_completed_successfully }
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW__CELERY__BROKER_URL}
+      AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND}
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    command: celery worker
+    networks: [airflow_net_dev]
+    volumes:
+      - ./airflow-docker/dags:/opt/airflow/dags
+      - ./airflow-docker/models-dev:/opt/airflow/models
+      - ./airflow-docker/data-dev:/opt/airflow/data
+      - ./airflow-docker/logs-dev:/opt/airflow/logs
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports: ["3000:3000"]
+    networks: [airflow_net_dev]
+    volumes:
+      - ./airflow-docker/grafana-data-dev:/var/lib/grafana
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: airflow-docker/Dockerfile.mlflow
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      MLFLOW_ARTIFACTS_DESTINATION: /mlartifacts
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5002
+      --backend-store-uri postgresql+psycopg2://airflow:airflow@postgres/mlflow_dev
+      --serve-artifacts
+      --artifacts-destination /mlartifacts
+    ports: ["5002:5002"]
+    networks: [airflow_net_dev]
+    volumes:
+      - ./airflow-docker/mlartifacts-dev:/mlartifacts
