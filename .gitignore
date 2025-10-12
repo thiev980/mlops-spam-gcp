@@ -61,3 +61,9 @@ data-prod/
 models-prod/
 grafana-data/
 postgres-init/
+
+# ───────────── PostgreSQL volumes ─────────────
+airflow-docker/pgdata-dev/
+airflow-docker/pgdata-prod/
+pgdata-dev/
+pgdata-prod/
