@@ -1,160 +1,104 @@
-# Spam Classifier — FastAPI & Airflow Batch Scoring
+# MLOps Spam Detection Pipeline
 
-End-to-end spam classifier with a FastAPI service for real-time inference and an Apache Airflow (Docker + PostgreSQL + CeleryExecutor) DAG for batch scoring.
+End-to-end MLOps pipeline for SMS spam classification, built with **Airflow**, **MLflow**, **PostgreSQL**, **Redis**, and **Grafana** — containerized via **Docker Compose** and ready for deployment on **Google Cloud**.
 
-## Features
-- Logistic Regression + TF-IDF (scikit-learn Pipeline)
-- FastAPI `/predict` (JSON in, Prediction & Probability out)
-- Airflow DAG for daily/manual batch scoring of CSVs
-- Extended DAG: optional evaluation metrics after each batch
-- Example model & example CSV included in repo
+---
+
+## Overview
+
+This project demonstrates a complete MLOps workflow for a text classification use case (spam detection).  
+It includes data ingestion, preprocessing, model training with hyperparameter tuning, experiment tracking, and performance monitoring — all orchestrated with Airflow and logged in MLflow.
+
+---
+
+## Tech Stack
+
+| Component | Purpose |
+|------------|----------|
+| **Airflow** | Workflow orchestration (training, evaluation, retraining) |
+| **MLflow** | Experiment tracking & model registry |
+| **PostgreSQL** | Metadata storage (Airflow + MLflow) |
+| **Redis** | Message broker for CeleryExecutor |
+| **Grafana** | Metrics visualization from MLflow DB |
+| **Docker Compose** | Containerized environment (Dev/Prod) |
+
+---
 
 ## Project Structure
+
 ```
-mlops_spam/
-├─ fastapi_app/             # FastAPI app
-│  └─ main.py
-├─ airflow_docker/          # Airflow subproject (Docker)
-│  ├─ dags/
-│  │  └─ spam_batch_scoring_dag.py
-│  ├─ data/
-│  │  └─ messages.csv
-│  ├─ models/
-│  │  └─ logreg_spam_pipeline.pkl
-│  └─ docker-compose.yml
-├─ models/
-│  └─ logreg_spam_pipeline.pkl
-├─ data/
-│  └─ messages.csv
-└─ README.md
+mlops-spam-gcp/
+├── airflow-docker/
+│   ├── dags/                # Airflow DAGs (pipelines)
+│   ├── models-dev/          # Saved models (dev)
+│   ├── data-dev/            # Local data inputs
+│   ├── logs-dev/            # Airflow logs
+│   ├── Dockerfile           # Airflow base image
+│   ├── Dockerfile.mlflow    # MLflow service image
+│   └── requirements.txt     # Python dependencies for Airflow
+├── fastapi_app/             # Optional: REST API for inference
+├── notebooks/               # Exploratory notebooks
+├── docker-compose.dev.yml   # Dev environment
+├── docker-compose.prod.yml  # Prod environment
+├── .env.dev / .env.prod     # Environment variables
+└── Makefile                 # Quick commands for switching environments
 ```
-
-## Requirements
-- Python 3.10–3.13 (local, for FastAPI)
-- Docker & Docker Compose (for Airflow)
-
-## Local API (FastAPI)
-```bash
-# venv (optional)
-python -m venv .venv && source .venv/bin/activate
-pip install fastapi uvicorn scikit-learn
-
-# Start FastAPI (port 5000)
-uvicorn fastapi_app.main:app --reload --port 5000
-# -> http://127.0.0.1:5000/docs
-```
-
-**Example request**
-```bash
-curl -X POST http://127.0.0.1:5000/predict   -H "Content-Type: application/json"   -d '{"text":"Win a FREE prize now!!!"}'
-```
-
-## Batch Scoring with Airflow (Docker)
-The metadata DB is PostgreSQL (backed by ./pgdata volume) + Redis broker.
-```bash
-cd airflow_docker
-echo "AIRFLOW_UID=$(id -u)" > .env
-docker compose up -d
-# UI -> http://localhost:8080 (Admin login see logs or set manually)
-```
-
-## .env example
-```
-AIRFLOW_UID=1000
-POSTGRES_USER=airflow
-POSTGRES_PASSWORD=airflow
-POSTGRES_DB=airflow
-
-AIRFLOW__CORE__EXECUTOR=CeleryExecutor
-AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
-AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
-AIRFLOW__CORE__PARALLELISM=16
-AIRFLOW__CORE__DAG_CONCURRENCY=16
-AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG=1
-
-AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-AIRFLOW__CORE__LOAD_EXAMPLES=False
-AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=Europe/Zurich
-```
-
-**Trigger DAG**
-- In UI enable `spam_batch_scoring` → ▶️ Trigger
-- Output: `airflow_docker/data/predictions_YYYY-MM-DD.csv`
-
-**CLI (inside container)**
-```bash
-docker exec -it airflow-web airflow dags trigger spam_batch_scoring
-docker exec -it airflow-web airflow dags list-runs -d spam_batch_scoring
-```
-
-## Data & Model
-- Example CSV: `data/messages.csv` (header: `id,text`)
-- Model: `models/logreg_spam_pipeline.pkl` (Pipeline with `TfidfVectorizer` + `LogisticRegression`)
-- For Airflow both are mounted into container (`/opt/airflow/data`, `/opt/airflow/models`).
-
-## Configuration
-- Inference threshold (`BEST_THRESHOLD`) configurable in DAG/FastAPI code.
-- Airflow timezone set in `docker-compose.yml` (e.g. `Europe/Zurich`).
-- Scheduler: adjust `schedule_interval` in DAG (e.g. `"0 2 * * *"`).
-
-## Troubleshooting
-- **Airflow UI not loading:** check logs `docker logs -f airflow-web`; change port if needed (`"8081:8080"`).
-- **Login in Airflow:** reset password:  
-  `docker exec -it airflow-web airflow users reset-password --username admin --password admin`
-- **Missing packages:** extend `_PIP_ADDITIONAL_REQUIREMENTS` in `docker-compose.yml` (e.g. `nltk`).
 
 ---
 
-# 🐳 Docker Cheat Sheet — Airflow & FastAPI Project
+## Setup & Usage
 
-## 🚀 Workflow
+### 1. Clone the repository
+```bash
+git clone https://github.com/thiev980/mlops-spam-gcp.git
+cd mlops-spam-gcp
+```
 
-1. **Start Docker Desktop**  
-   - On macOS the whale icon in the menu bar → must be running.
+### 2. Spin up the **Dev** environment
+```bash
+make up-dev
+```
+Services will start:
+- Airflow → [http://localhost:8080](http://localhost:8080)  
+- MLflow → [http://localhost:5002](http://localhost:5002)  
+- Grafana → [http://localhost:3000](http://localhost:3000)
 
-2. **Go to project folder**  
-   ```bash
-   cd ~/Data\ Science/Projects/mlops_spam/airflow-docker
-   ```
+### 3. Trigger a pipeline
+In the Airflow UI, trigger the DAG **`spam_train_tune`** to start model training and log metrics to MLflow.
 
-3. **Start Airflow stack (background)**  
-   ```bash
-   docker compose up -d
-   ```
-   - Starts Postgres, Redis, Airflow (Webserver, Scheduler, Worker).  
-   - UI: [http://localhost:8080](http://localhost:8080)
-
-4. **Stop containers**  
-   ```bash
-   docker compose down
-   ```
-   - Removes containers but keeps volumes.  
-   - Remove everything (logs, DB):  
-     ```bash
-     docker compose down -v
-     ```
+### 4. Visualize results
+In Grafana, connect to the MLflow Postgres DB and visualize metrics (F1, precision, recall, ROC AUC, etc.).
 
 ---
 
-## 🔑 Useful Commands
+## Deployment
 
-| Command | Description |
-|---------|-------------|
-| `docker ps` | Show running containers |
-| `docker compose ps` | Show containers of this project |
-| `docker logs -f airflow-web` | Follow logs of the Airflow webserver |
-| `docker exec -it airflow-worker bash` | Open shell inside worker |
-| `docker images` | List local images |
-| `docker system df` | Check disk usage |
-| `docker system prune` | Cleanup unused containers, networks, caches |
+The same stack can be deployed to **Google Cloud** using:
+- **Cloud Run** for the services (Airflow, MLflow, FastAPI)
+- **Cloud SQL** for PostgreSQL
+- **Cloud Storage** for artifacts and data
+- **Cloud Logging / Monitoring** for observability
 
 ---
 
-## ⚡ Resource Usage
+## Key Features
 
-- **Docker Desktop idle**: ~0.5–1.5 GB RAM, CPU minimal.  
-- **Containers idle**: Airflow + DB + Redis → ~200–500 MB each.  
-- **During DAG runs**: RAM/CPU usage depends on Python tasks (pandas, sklearn).  
-- **Image builds**: short spikes of CPU/RAM.  
+- Automated training & retraining via Airflow DAGs  
+- Centralized experiment tracking in MLflow  
+- Real-time monitoring dashboards in Grafana  
+- Isolated Dev & Prod Docker Compose environments  
+- Cloud-ready architecture for GCP deployment  
 
-👉 In idle state: uncritical. Load only when running DAGs or builds.
+---
+
+## Author
+
+**Thi Fi**  
+Editorial Data Analyst & MLOps Enthusiast  
+📍 Zürich  
+
+---
+
+## License
+
+This project is released under the MIT License. See `LICENSE` for details.

@@ -1,0 +1,44 @@
+# ---- Core ignores ----
+# VCS / OS / editors
+.git/
+.gitignore
+.DS_Store
+.idea/
+.vscode/
+
+# Python venv & caches
+.venv/
+env/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Local environment files & secrets
+.env
+.env.*
+!.env.example
+!.env.prod.example
+!.env.dev.example
+
+# Notebooks & large local artifacts
+notebooks/
+models/
+data/
+data-*/
+*.ipynb
+*.ipynb_checkpoints/
+
+# Airflow local state (never ship to Cloud Build)
+airflow-docker/pgdata*/
+airflow-docker/logs*/
+airflow-docker/data-*/
+airflow-docker/models-*/
+airflow-docker/mlartifacts-*/
+airflow-docker/grafana-data/
+
+# Docker-compose only files (not needed to build images)
+docker-compose*.yml
+Makefile

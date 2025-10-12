@@ -67,3 +67,6 @@ airflow-docker/pgdata-dev/
 airflow-docker/pgdata-prod/
 pgdata-dev/
 pgdata-prod/
+
+# ───────────── Notes ─────────────
+.notes

@@ -1,0 +1,47 @@
+# Cloud Build: builds and pushes your Airflow & MLflow images to Artifact Registry.
+# Run from repo root:
+#   gcloud builds submit --config cloudbuild.yaml --substitutions=_REGION=europe-west6,_REPO=mlops-spam,_TAG=v0.1.0
+#
+# Prereqs (once):
+#   gcloud artifacts repositories create mlops-spam --repository-format=DOCKER --location=europe-west6
+#   gcloud auth configure-docker europe-west6-docker.pkg.dev
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _REGION: europe-west6       # override via --substitutions
+  _REPO: mlops-spam           # Artifact Registry repo name
+  _TAG: latest                # image tag
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/my-airflow:${_TAG}
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/mlflow:${_TAG}
+
+steps:
+  # Build Airflow image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/my-airflow:${_TAG}
+      - -f
+      - airflow-docker/Dockerfile
+      - .
+
+  # Build MLflow image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/mlflow:${_TAG}
+      - -f
+      - airflow-docker/Dockerfile.mlflow
+      - .
+
+  # Push both images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push','${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/my-airflow:${_TAG}']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push','${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/mlflow:${_TAG}']
