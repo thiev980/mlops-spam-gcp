@@ -21,7 +21,7 @@ services:
       - "5432:5432"
     networks: [airflow_net]
     volumes:
-      - ./pgdata-prod:/var/lib/postgresql/data
+      - pgdata_prod:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
 
   redis:
@@ -138,7 +138,7 @@ services:
     ports: ["3000:3000"]
     networks: [airflow_net]
     volumes:
-      - ./grafana-data:/var/lib/grafana
+      - grafana_data_prod:/var/lib/grafana
 
   mlflow:
     build:
@@ -159,4 +159,12 @@ services:
     ports: ["5002:5002"]
     networks: [airflow_net]
     volumes:
-      - ./airflow-docker/mlartifacts-prod:/mlartifacts
+      - mlartifacts_prod:/mlartifacts
+
+volumes:
+  pgdata_prod:
+  grafana_data_prod:
+  mlartifacts_prod:
+  # optional – nur falls du später auch Logs/Data auf Named Volumes legen willst:
+  # airflow_logs_prod:
+  # airflow_data_prod:
