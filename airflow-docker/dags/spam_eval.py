@@ -1,12 +1,15 @@
+# dags/spam_eval.py
 from __future__ import annotations
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 from pathlib import Path
-import pandas as pd
-import numpy as np
 import os, json, base64
 from io import BytesIO
+
+import numpy as np
+import pandas as pd
 from sklearn.metrics import (
     precision_recall_curve, roc_auc_score,
     precision_score, recall_score, f1_score, roc_curve
@@ -15,11 +18,11 @@ from sklearn.metrics import (
 # -------------------------------------------------------------------
 # Pfade
 # -------------------------------------------------------------------
-DATA_DIR = Path("/opt/airflow/data")
-INCOMING = DATA_DIR / "incoming"
-LABELS   = DATA_DIR / "labels"
-PREDS    = DATA_DIR / "predictions"
-METRICS  = DATA_DIR / "metrics_history.csv"
+DATA_DIR   = Path("/opt/airflow/data")
+INCOMING   = DATA_DIR / "incoming"
+LABELS     = DATA_DIR / "labels"
+PREDS      = DATA_DIR / "predictions"
+METRICS    = DATA_DIR / "metrics_history.csv"
 THRESH_PATH = DATA_DIR / "threshold.json"
 
 DEFAULT_ARGS = {
@@ -33,11 +36,13 @@ DEFAULT_ARGS = {
 # Low-level Utils
 # -------------------------------------------------------------------
 def _atomic_write_df(df: pd.DataFrame, dest: Path):
+    dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
     df.to_csv(tmp, index=False)
     tmp.replace(dest)
 
 def _atomic_write_bytes(content: bytes, dest: Path):
+    dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
     with open(tmp, "wb") as f:
         f.write(content)
@@ -194,13 +199,13 @@ def _compute_metrics(ds: str):
     fn = int(((y_true == 1) & (y_pred == 0)).sum())
 
     eps = 1e-12
-    accuracy    = (tp + tn) / max(tp + tn + fp + fn, 1)
-    precision   = tp / max(tp + fp, 1) if (tp + fp) > 0 else 0.0
-    recall      = tp / max(tp + fn, 1) if (tp + fn) > 0 else 0.0
-    specificity = tn / max(tn + fp, 1) if (tn + fp) > 0 else 0.0
-    f1          = 2 * precision * recall / max(precision + recall, eps) if (precision + recall) > 0 else 0.0
-    balanced_acc= 0.5 * (recall + specificity)
-    fpr_used    = fp / max(fp + tn, 1) if (fp + tn) > 0 else 0.0
+    accuracy     = (tp + tn) / max(tp + tn + fp + fn, 1)
+    precision    = tp / max(tp + fp, 1) if (tp + fp) > 0 else 0.0
+    recall       = tp / max(tp + fn, 1) if (tp + fn) > 0 else 0.0
+    specificity  = tn / max(tn + fp, 1) if (tn + fp) > 0 else 0.0
+    f1           = 2 * precision * recall / max(precision + recall, eps) if (precision + recall) > 0 else 0.0
+    balanced_acc = 0.5 * (recall + specificity)
+    fpr_used     = fp / max(fp + tn, 1) if (fp + tn) > 0 else 0.0
 
     # ROC-AUC (falls Probas vorhanden)
     proba_col = _find_proba_col(df)
@@ -236,7 +241,7 @@ def _compute_metrics(ds: str):
                      "target_recall": target_recall,
                      "target_fpr": target_fpr,
                      **summary}
-        # Speichere Vorschlag → wird beim nächsten Scoring benutzt
+        # Speichern als Vorschlag für nächsten Tag (lokal)
         save_threshold(suggested_thr, meta={"suggested_from": ds, **suggested})
 
     # Input-Spamrate (Ground truth)
@@ -255,7 +260,7 @@ def _compute_metrics(ds: str):
         "roc_auc": (round(roc_auc, 6) if roc_auc is not None else None),
         "spam_rate": round(spam_rate, 6),
         "proba_col": proba_col,
-        "preds_file": str(preds_path.name),
+        "preds_file": str((PREDS / f"{ds}.csv").name),
         "threshold_used": float(thr_used),
         "fpr_used": round(float(fpr_used), 6),
         # vorgeschlagener Threshold (falls berechnet)
@@ -267,7 +272,7 @@ def _compute_metrics(ds: str):
         "suggested_fpr": suggested.get("fpr"),
     }
 
-    # Append/Upsert in CSV (legacy-sicher)
+    # Append/Upsert in CSV
     if METRICS.exists() and METRICS.stat().st_size > 0:
         hist = pd.read_csv(METRICS)
         if "ds" not in hist.columns and "date" in hist.columns:
@@ -358,6 +363,44 @@ def plot_trend_png():
     return {"png_path": str(out), "data_url": data_url}
 
 # -------------------------------------------------------------------
+# Vorschlag Threshold in Registry promoten
+# -------------------------------------------------------------------
+def promote_threshold_to_registry():
+    import mlflow, json, os
+    from pathlib import Path
+    from mlflow.tracking import MlflowClient
+
+    THRESH = Path("/opt/airflow/data/threshold.json")
+    if not THRESH.exists():
+        print("[promote] no local threshold.json -> nothing to promote")
+        return
+
+    # Datei lesen (validieren)
+    try:
+        data = json.loads(THRESH.read_text())
+        thr = float(data.get("threshold"))
+    except Exception as e:
+        print(f"[promote] invalid threshold.json: {e}")
+        return
+
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5002"))
+    client = MlflowClient()
+    MODEL_NAME = "spam-classifier"
+
+    # aktuellen Production-Run holen
+    vers = client.get_latest_versions(MODEL_NAME, stages=["Production"])
+    if not vers:
+        print("[promote] no Production model version found -> skip")
+        return
+    run_id = vers[0].run_id
+
+    # sichere Kopie in ein temp file und uploade nach model/threshold.json
+    tmp = Path("/tmp/threshold.json")
+    tmp.write_text(json.dumps({"threshold": thr}, indent=2))
+    client.log_artifact(run_id=run_id, local_path=str(tmp), artifact_path="model")
+    print(f"[promote] uploaded threshold={thr:.4f} to Production run {run_id} (model/threshold.json)")
+
+# -------------------------------------------------------------------
 # Upsert nach Postgres (Schema-Autoupdate)
 # -------------------------------------------------------------------
 def upsert_metrics_to_postgres():
@@ -425,7 +468,6 @@ def upsert_metrics_to_postgres():
             (None if pd.isna(r.get("suggested_fpr")) else float(r.get("suggested_fpr"))),
         ))
 
-    # Schema + Upsert
     create_sql = """
     CREATE TABLE IF NOT EXISTS metrics_history (
         ds TEXT PRIMARY KEY,
@@ -451,7 +493,6 @@ def upsert_metrics_to_postgres():
         suggested_fpr DOUBLE PRECISION
     );
     """
-    # Für bestehende Tabellen: fehlende Spalten additiv ergänzen
     alters = [
         "ALTER TABLE metrics_history ADD COLUMN IF NOT EXISTS threshold_used DOUBLE PRECISION;",
         "ALTER TABLE metrics_history ADD COLUMN IF NOT EXISTS fpr_used DOUBLE PRECISION;",
@@ -500,10 +541,22 @@ def upsert_metrics_to_postgres():
         cur.execute(create_sql)
         for stmt in alters:
             cur.execute(stmt)
-        execute_values(cur, insert_sql, rows, page_size=500)
-    print(f"[pg] upserted {len(rows)} rows into metrics_history")
+        if rows:
+            execute_values(cur, insert_sql, rows, page_size=500)
+            print(f"[pg] upserted {len(rows)} rows into metrics_history")
+        else:
+            print("[pg] nothing to upsert")
 
-def eval_task(ds: str, **_):
+# -------------------------------------------------------------------
+# Task-Wrappers mit Orchestrator-ds
+# -------------------------------------------------------------------
+def eval_task(ds: str | None = None, **context):
+    # Orchestrator-kompatibel: ds aus DagRun.conf übernehmen
+    dag_run = context.get("dag_run")
+    conf = (dag_run.conf if dag_run else {}) or {}
+    if ds is None:
+        ds = conf.get("ds")
+    ds = ds or datetime.utcnow().strftime("%Y-%m-%d")
     return _compute_metrics(ds)
 
 # -------------------------------------------------------------------
@@ -512,13 +565,16 @@ def eval_task(ds: str, **_):
 with DAG(
     dag_id="spam_eval",
     default_args=DEFAULT_ARGS,
-    schedule_interval=None,
+    schedule=None,            # vom Orchestrator getriggert
     catchup=False,
-    tags=["spam","eval"],
+    tags=["spam", "eval"],
     description="Merge labels & predictions, compute metrics, append to history, plot trend, upsert Postgres (+suggest threshold).",
 ) as dag:
-    evaluate = PythonOperator(task_id="evaluate_and_append", python_callable=eval_task)
+    evaluate  = PythonOperator(task_id="evaluate_and_append", python_callable=eval_task)
     plot_trend = PythonOperator(task_id="plot_trend_png", python_callable=plot_trend_png)
-    upsert_pg = PythonOperator(task_id="upsert_metrics_to_postgres", python_callable=upsert_metrics_to_postgres)
+    upsert_pg  = PythonOperator(task_id="upsert_metrics_to_postgres", python_callable=upsert_metrics_to_postgres)
 
-    evaluate >> plot_trend >> upsert_pg
+    promote = PythonOperator(task_id="promote_threshold_to_registry",
+                         python_callable=promote_threshold_to_registry)
+
+    evaluate >> plot_trend >> upsert_pg >> promote

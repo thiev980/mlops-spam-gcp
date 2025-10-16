@@ -1,13 +1,18 @@
 # dags/spam_gen_llm.py
 from __future__ import annotations
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 from pathlib import Path
 import os, json, time, math, random, re, unicodedata
+
 import pandas as pd
 import requests
 
+# --------------------------------------------------------------------
+# Pfade & Konstanten
+# --------------------------------------------------------------------
 DATA_DIR   = Path("/opt/airflow/data")
 INCOMING   = DATA_DIR / "incoming"
 LABELS     = DATA_DIR / "labels"
@@ -18,22 +23,30 @@ LABELS.mkdir(parents=True, exist_ok=True)
 DEFAULT_ARGS = {
     "owner": "ml_engineer",
     "start_date": datetime(2025, 9, 1),
-    "retries": 0,                 # kein Auto-Retry bei LLM
+    "retries": 0,                  # kein Auto-Retry bei LLM
     "retry_delay": timedelta(minutes=1),
 }
 
+# --------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------
 def _atomic_write(df: pd.DataFrame, dest: Path):
+    dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
     df.to_csv(tmp, index=False)
     tmp.replace(dest)
+
+def _seed_from_ds(ds: str) -> int:
+    # stabiler, deterministischer Seed aus Datum (YYYYMMDD)
+    return int(pd.to_datetime(ds).strftime("%Y%m%d"))
 
 # ---------- Adversarial Seeds (FN/FP von gestern) ----------
 def _load_adversarial_seeds(ds: str, k_each: int = 12) -> list[str]:
     """
     Nimmt die Predictions & Labels von VORTAG (falls vorhanden) und
     extrahiert ein paar 'hard cases':
-      - FN (spam==1, pred==0)  -> entgingen dem Modell
-      - FP (spam==0, pred==1)  -> fälschlich als Spam erkannt
+      - FN (spam==1, pred==0)
+      - FP (spam==0, pred==1)
     Gibt eine kleine Liste von Beispiel-Texten zurück (ohne Duplikate).
     """
     try:
@@ -49,14 +62,12 @@ def _load_adversarial_seeds(ds: str, k_each: int = 12) -> list[str]:
     try:
         df_p = pd.read_csv(preds_path)
         df_l = pd.read_csv(labels_path)
-        # normalize column names
         if "prediction" in df_p.columns:
-            df_p = df_p.rename(columns={"prediction":"pred"})
+            df_p = df_p.rename(columns={"prediction": "pred"})
         if "label" in df_l.columns:
-            df_l = df_l.rename(columns={"label":"label_gt"})
+            df_l = df_l.rename(columns={"label": "label_gt"})
 
         df = df_p.merge(df_l, on="id", how="inner")
-        # tolerant gegen verschiedene Spaltennamen
         text_col = "text" if "text" in df.columns else None
         if text_col is None:
             return []
@@ -64,14 +75,13 @@ def _load_adversarial_seeds(ds: str, k_each: int = 12) -> list[str]:
         fn = df[(df["label_gt"] == 1) & (df["pred"] == 0)][text_col].dropna().tolist()
         fp = df[(df["label_gt"] == 0) & (df["pred"] == 1)][text_col].dropna().tolist()
 
-        rng = random.Random(hash(ds) % 2_000_000)
+        rng = random.Random(_seed_from_ds(ds))
         samples = []
         if fn:
             samples += rng.sample(fn, k=min(k_each, len(fn)))
         if fp:
             samples += rng.sample(fp, k=min(k_each, len(fp)))
 
-        # dedup & kürzen
         seen, out = set(), []
         for t in samples:
             t = str(t).strip()
@@ -90,10 +100,10 @@ def _normalize(s: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
-HOMO = str.maketrans({"o":"ο","a":"ɑ","e":"е","i":"і","l":"ⅼ","c":"ϲ"})
+HOMO = str.maketrans({"o": "ο", "a": "ɑ", "e": "е", "i": "і", "l": "ⅼ", "c": "ϲ"})
 
 def _obfuscate_text(s: str, rng: random.Random) -> str:
-    choice = rng.choice([0,1,2,3])
+    choice = rng.choice([0, 1, 2, 3])
     if choice == 0:
         return s.translate(HOMO)
     if choice == 1:
@@ -105,8 +115,7 @@ def _obfuscate_text(s: str, rng: random.Random) -> str:
     return s
 
 def _break_alternation(labels: list[int]) -> bool:
-    # fast perfekte 0,1,0,1,…-Alternation?
-    runs = sum(1 for i in range(1, len(labels)) if labels[i] != labels[i-1])
+    runs = sum(1 for i in range(1, len(labels)) if labels[i] != labels[i - 1])
     return runs >= len(labels) - 2
 
 def _harden_and_shuffle(rows: list[dict], rng: random.Random, spam_target=0.15, tol=0.05):
@@ -120,7 +129,7 @@ def _harden_and_shuffle(rows: list[dict], rng: random.Random, spam_target=0.15, 
         uniq.append(r)
     rows = uniq
 
-    # grobe Spamquote (nur Simulation)
+    # grobe Spamquote (Simulation)
     n = len(rows)
     lo, hi = (spam_target - tol) * n, (spam_target + tol) * n
     spam_idx = [i for i, r in enumerate(rows) if r["label"] == 1]
@@ -162,11 +171,16 @@ def _llm_generate(n: int, ds: str, spam_pct: int = 15) -> list[dict]:
 
     def _session():
         s = requests.Session()
-        r = Retry(total=3, backoff_factor=1.5,
-                  status_forcelist=[429,500,502,503,504],
-                  allowed_methods=["POST"], raise_on_status=False)
+        r = Retry(
+            total=3,
+            backoff_factor=1.5,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["POST"],
+            raise_on_status=False,
+        )
         a = HTTPAdapter(max_retries=r)
-        s.mount("https://", a); s.mount("http://", a)
+        s.mount("https://", a)
+        s.mount("http://", a)
         return s
 
     # adversarial seeds aus dem Vortag
@@ -174,7 +188,10 @@ def _llm_generate(n: int, ds: str, spam_pct: int = 15) -> list[dict]:
     seeds_blurb = ""
     if seeds:
         sample = "\n".join(f"- {t}" for t in seeds[:12])
-        seeds_blurb = f"\nUse the following example styles as inspiration (do NOT copy verbatim):\n{sample}\n"
+        seeds_blurb = (
+            "\nUse the following example styles as inspiration (do NOT copy verbatim):\n"
+            f"{sample}\n"
+        )
 
     def _one_batch(batch_size: int, start_id: int) -> list[dict]:
         prompt = f"""
@@ -220,30 +237,32 @@ Example structure:
                                     "properties": {
                                         "id": {"type": "integer"},
                                         "text": {"type": "string"},
-                                        "label": {"type": "integer", "enum": [0, 1]}
+                                        "label": {"type": "integer", "enum": [0, 1]},
                                     },
                                     "required": ["id", "text", "label"],
-                                    "additionalProperties": False
+                                    "additionalProperties": False,
                                 },
-                                "minItems": batch_size
+                                "minItems": batch_size,
                             }
                         },
                         "required": ["items"],
-                        "additionalProperties": False
+                        "additionalProperties": False,
                     },
-                    "strict": True
-                }
-            }
+                    "strict": True,
+                },
+            },
         }
 
         sess = _session()
         resp = sess.post(endpoint, headers=headers, json=body, timeout=(10, 90))
         if resp.status_code != 200:
-            raise RuntimeError(f"[batch {start_id}-{start_id+batch_size-1}] HTTP {resp.status_code}: {resp.text[:400]}")
+            raise RuntimeError(
+                f"[batch {start_id}-{start_id+batch_size-1}] HTTP {resp.status_code}: {resp.text[:400]}"
+            )
         data = resp.json()
         text = data["choices"][0]["message"]["content"]
 
-        # JSON parse
+        # JSON parse (robust)
         try:
             obj = json.loads(text)
             items = obj.get("items", None)
@@ -254,7 +273,7 @@ Example structure:
             lb, rb = text.find("{"), text.rfind("}")
             if lb != -1 and rb != -1 and rb > lb:
                 try:
-                    obj = json.loads(text[lb:rb+1])
+                    obj = json.loads(text[lb : rb + 1])
                     items = obj.get("items", None)
                 except Exception:
                     items = None
@@ -265,8 +284,10 @@ Example structure:
 
         out = []
         for x in items:
-            if isinstance(x, dict) and {"id","text","label"}.issubset(x.keys()):
-                out.append({"id": int(x["id"]), "text": str(x["text"]), "label": 1 if int(x["label"])==1 else 0})
+            if isinstance(x, dict) and {"id", "text", "label"}.issubset(x.keys()):
+                out.append(
+                    {"id": int(x["id"]), "text": str(x["text"]), "label": 1 if int(x["label"]) == 1 else 0}
+                )
         if not out:
             raise ValueError(f"[batch {start_id}] parsed JSON but empty payload.")
         return out
@@ -276,7 +297,7 @@ Example structure:
     results: list[dict] = []
     next_id = 1
     for i in range(num_batches):
-        want = batch if (i < num_batches - 1) else (n - batch*(num_batches-1))
+        want = batch if (i < num_batches - 1) else (n - batch * (num_batches - 1))
         for attempt in range(2):
             try:
                 part = _one_batch(want, next_id)
@@ -293,13 +314,21 @@ Example structure:
 
     if not results:
         raise ValueError("LLM returned no items across all batches")
-    # hardening & shuffle deterministisch pro ds
-    rng = random.Random(hash(ds) % 2_000_000)
+
+    rng = random.Random(_seed_from_ds(ds))
     results = _harden_and_shuffle(results, rng=rng, spam_target=0.15, tol=0.05)
     return results
 
 # ---------- Airflow Task ----------
-def generate_llm_batches(ds: str, **_):
+def generate_llm_batches(ds: str | None = None, **context):
+    # DagRun conf aus Orchestrator (TriggerDagRunOperator) erlauben
+    dag_run = context.get("dag_run")
+    conf = (dag_run.conf if dag_run else {}) or {}
+
+    if ds is None:
+        ds = conf.get("ds")
+    ds = ds or datetime.utcnow().strftime("%Y-%m-%d")
+
     INCOMING.mkdir(parents=True, exist_ok=True)
     LABELS.mkdir(parents=True, exist_ok=True)
 
@@ -310,22 +339,28 @@ def generate_llm_batches(ds: str, **_):
         print(f"{incoming_path} and {labels_path} exist; skip.")
         return
 
-    rng = random.Random(hash(ds) % 2_000_000)
+    rng = random.Random(_seed_from_ds(ds))
     n = rng.randint(120, 180)  # Variation pro Tag
 
     rows = _llm_generate(n=n, ds=ds, spam_pct=15)
     df = pd.DataFrame(rows)
 
-    _atomic_write(df[["id","text"]], incoming_path)
-    _atomic_write(df[["id","label"]], labels_path)
+    _atomic_write(df[["id", "text"]], incoming_path)
+    _atomic_write(df[["id", "label"]], labels_path)
     print(f"Wrote {len(df)} rows -> {incoming_path} & {labels_path}")
 
+# --------------------------------------------------------------------
+# Airflow DAG
+# --------------------------------------------------------------------
 with DAG(
     dag_id="spam_gen_llm",
     default_args=DEFAULT_ARGS,
-    schedule_interval="0 2 * * *",   # 02:00 täglich
+    schedule=None,                 # wird vom Orchestrator getriggert
     catchup=False,
-    tags=["spam","llm","generate"],
+    tags=["spam", "llm", "generate"],
     description="Generate unlabeled messages + separate labels via LLM (hardened + adversarial seeds)",
 ) as dag:
-    gen = PythonOperator(task_id="generate_llm_batches", python_callable=generate_llm_batches)
+    gen = PythonOperator(
+        task_id="generate_llm_batches",
+        python_callable=generate_llm_batches,
+    )

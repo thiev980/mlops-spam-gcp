@@ -1,14 +1,21 @@
-# spam_score_model.py
+# dags/spam_score_model.py
 from __future__ import annotations
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 from pathlib import Path
 import os, json
+
 import pandas as pd
 import mlflow
 import mlflow.sklearn
+from mlflow.tracking import MlflowClient
 
+
+# --------------------------------------------------------------------
+# Pfade & Konstanten
+# --------------------------------------------------------------------
 DATA_DIR    = Path("/opt/airflow/data")
 INCOMING    = DATA_DIR / "incoming"
 PRED_DIR    = DATA_DIR / "predictions"
@@ -26,10 +33,16 @@ DEFAULT_ARGS = {
     "retry_delay": timedelta(minutes=3),
 }
 
+
+# --------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------
 def _atomic_write(df: pd.DataFrame, dest: Path):
+    dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
     df.to_csv(tmp, index=False)
     tmp.replace(dest)
+
 
 def _load_threshold_from_registry() -> float:
     """
@@ -51,12 +64,15 @@ def _load_threshold_from_registry() -> float:
 
     # 2) Aus Registry (Production)
     try:
-        client = mlflow.tracking.MlflowClient()
+        client = MlflowClient()
         prod_versions = client.get_latest_versions(MODEL_NAME, stages=["Production"])
         if not prod_versions:
             raise RuntimeError("No Production model found in registry.")
+
         run_id = prod_versions[0].run_id
-        local_dir = mlflow.artifacts.download_artifacts(run_id=run_id, artifact_path="model")
+        # Wir erwarten threshold.json auf Artefakt-Pfad "model/threshold.json".
+        # Download robust via Client (liefert lokalen Ordnerpfad zurück).
+        local_dir = client.download_artifacts(run_id, "model")
         thresh_file = Path(local_dir) / "threshold.json"
         if thresh_file.exists():
             obj = json.loads(thresh_file.read_text())
@@ -87,7 +103,16 @@ def _load_threshold_from_registry() -> float:
     print(f"[threshold] using default={t}")
     return t
 
-def score_model(ds: str, **_):
+
+def score_model(ds: str | None = None, **context):
+    # DagRun conf (falls via TriggerDagRunOperator gesetzt)
+    dag_run = context.get("dag_run")
+    conf = (dag_run.conf if dag_run else {}) or {}
+
+    if ds is None:
+        ds = conf.get("ds")
+    ds = ds or datetime.utcnow().strftime("%Y-%m-%d")
+
     in_path = INCOMING / f"{ds}.csv"
     if not in_path.exists():
         raise FileNotFoundError(f"Missing input: {in_path}")
@@ -107,7 +132,10 @@ def score_model(ds: str, **_):
     # Textspalte robust finden
     text_col = next((c for c in ["text", "message", "body", "content"] if c in df.columns), None)
     if text_col is None:
-        raise ValueError(f"No text column found in {in_path}. Expected one of ['text','message','body','content'].")
+        raise ValueError(
+            f"No text column found in {in_path}. "
+            "Expected one of ['text','message','body','content']."
+        )
 
     if len(df) == 0:
         out = df.copy()
@@ -124,10 +152,10 @@ def score_model(ds: str, **_):
     if hasattr(pipeline, "predict_proba"):
         probs = pipeline.predict_proba(X)[:, 1]
     else:
-        # Fallback: Scores auf 0..1 minmaxen (sollte selten gebraucht werden)
+        # Fallback: Scores auf 0..1 minmaxen (selten benötigt)
         from sklearn.preprocessing import MinMaxScaler
         scores = pipeline.decision_function(X)
-        probs = MinMaxScaler().fit_transform(scores.reshape(-1,1)).ravel()
+        probs = MinMaxScaler().fit_transform(scores.reshape(-1, 1)).ravel()
 
     thr = _load_threshold_from_registry()
     preds = (probs >= thr).astype(int)
@@ -141,12 +169,19 @@ def score_model(ds: str, **_):
     _atomic_write(out, PRED_LATEST)
     print(f"[scoring] model={model_uri} threshold_used={thr:.4f} → wrote {pred_path.name} & {PRED_LATEST.name}")
 
+
+# --------------------------------------------------------------------
+# Airflow DAG
+# --------------------------------------------------------------------
 with DAG(
     dag_id="spam_score_model",
     default_args=DEFAULT_ARGS,
-    schedule_interval="5 2 * * *",   # 02:05 täglich
+    schedule=None,                 # wird vom Orchestrator getriggert
     catchup=False,
-    tags=["spam","scoring"],
+    tags=["spam", "scoring"],
     description="Score daily messages with the model (loads Production from MLflow Registry).",
 ) as dag:
-    t = PythonOperator(task_id="score_model", python_callable=score_model)
+    t = PythonOperator(
+        task_id="score_model",
+        python_callable=score_model,
+    )
