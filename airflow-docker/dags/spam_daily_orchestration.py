@@ -1,32 +1,25 @@
-# dags/spam_daily_orchestration.py
+# spam_daily_orchestration.py
 from __future__ import annotations
-from datetime import datetime, timedelta
-from pendulum import timezone
+from datetime import timedelta
+import pendulum
+
 from airflow import DAG
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
-LOCAL_TZ = timezone("Europe/Zurich")
-
 DEFAULT_ARGS = {
     "owner": "ml_engineer",
-    "start_date": datetime(2025, 9, 1, tzinfo=LOCAL_TZ),
+    "start_date": pendulum.datetime(2025, 9, 1, tz="Europe/Zurich"),
     "retries": 0,
     "retry_delay": timedelta(minutes=2),
 }
 
-# Hinweis:
-# - Wir geben ds explizit als conf weiter. Deine Sub-DAGs nutzen bereits "ds",
-#   manche Tasks können optional dieses conf["ds"] lesen, falls nötig.
-# - wait_for_completion=True blockiert bis die getriggerte DAG (für *diesen* Run)
-#   fertig ist (oder fehlschlägt).
 with DAG(
     dag_id="spam_daily_orchestration",
-    default_args=DEFAULT_ARGS,
-    schedule="0 2 * * *",         # 02:00 local, thanks to timezone=...
-    timezone=LOCAL_TZ,            # <<< key: schedule interpreted in Zurich time (handles DST)
+    schedule="0 2 * * *",       # täglich 02:00
     catchup=False,
+    default_args=DEFAULT_ARGS,
     tags=["spam", "orchestration"],
-    description="Trigger sequence: LLM gen -> score -> eval (+ promote threshold).",
+    description="Trigger sequence: LLM gen -> model score -> eval (waits between steps).",
 ) as dag:
 
     gen = TriggerDagRunOperator(
