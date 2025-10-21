@@ -22,10 +22,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install ssh client
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
+        run: |
+          set -eo pipefail
+          sudo apt-get update
+          sudo apt-get install -y openssh-client
 
       - name: Setup SSH key
         run: |
+          set -eo pipefail
           mkdir -p ~/.ssh
           echo "${{ secrets.VM_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
@@ -36,14 +40,19 @@ jobs:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
         run: |
-          set -euo pipefail
+          set -eo pipefail
           ssh -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}" bash -lc '
-            set -euo pipefail
+            set -eo pipefail
             cd ~/mlops-spam-gcp
-            git pull --rebase
+            echo "[VM] Resetting repo to clean state..."
+            git fetch origin main || true
+            git reset --hard origin/main
+            git clean -fd
+            echo "[VM] Running export..."
             if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi
             python3 tools/export_metrics_for_pages.py
-            echo "[VM] created:" && ls -lh docs/metrics.json || true
+            echo "[VM] Created files:"
+            ls -lh docs/metrics.json || true
           '
 
       - name: Copy metrics.json from VM to runner
@@ -51,20 +60,23 @@ jobs:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
         run: |
-          set -euo pipefail
+          set -eo pipefail
           mkdir -p site
+          echo "[Runner] Copying docs/metrics.json from VM..."
           scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:~/mlops-spam-gcp/docs/metrics.json" site/metrics.json
-          echo "[Runner] preview of copied file:"
+          echo "[Runner] Preview of copied file:"
           head -c 200 site/metrics.json || true
 
       - name: Commit & push if changed
         run: |
+          set -eo pipefail
           if ! git diff --quiet -- site/metrics.json; then
+            echo "[GIT] Changes detected – committing update..."
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add site/metrics.json
             git commit -m "metrics: daily auto-update"
             git push
           else
-            echo "No changes in site/metrics.json"
+            echo "[GIT] No changes in site/metrics.json"
           fi
