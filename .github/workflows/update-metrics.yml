@@ -3,7 +3,8 @@ name: Update metrics.json (daily)
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "5 3 * * *"  # 03:05 UTC täglich
+    # Täglich 03:05 UTC (entspricht 05:05 in CH im Sommer, 04:05 im Winter)
+    - cron: "5 3 * * *"
 
 permissions:
   contents: write
@@ -17,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo (main)
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install ssh client
@@ -35,39 +36,35 @@ jobs:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}" <<'EOSSH'
+          set -euo pipefail
+          ssh -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}" bash -lc '
             set -euo pipefail
             cd ~/mlops-spam-gcp
             git pull --rebase
             if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi
-            python3 tools/export_metrics_for_pages.py \
-              --out-json /tmp/metrics.json \
-              --out-csv  /tmp/metrics.csv
-          EOSSH
+            python3 tools/export_metrics_for_pages.py
+            echo "[VM] created:" && ls -lh docs/metrics.json || true
+          '
 
-      - name: Switch to gh-pages
-        run: |
-          git fetch origin gh-pages:gh-pages || true
-          git checkout gh-pages
-
-      - name: Copy artifacts from VM
+      - name: Copy metrics.json from VM to runner
         env:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
         run: |
-          scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:/tmp/metrics.json" ./metrics.json
-          # Optional: CSV mitveröffentlichen
-          # scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:/tmp/metrics.csv"  ./metrics.csv
-          test -f index.html || echo "<h1>placeholder</h1>" > index.html
+          set -euo pipefail
+          mkdir -p site
+          scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:~/mlops-spam-gcp/docs/metrics.json" site/metrics.json
+          echo "[Runner] preview of copied file:"
+          head -c 200 site/metrics.json || true
 
-      - name: Commit & push if changed (gh-pages)
+      - name: Commit & push if changed
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- metrics.json; then
-            git add metrics.json
+          if ! git diff --quiet -- site/metrics.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add site/metrics.json
             git commit -m "metrics: daily auto-update"
-            git push origin gh-pages
+            git push
           else
-            echo "No changes in metrics.json"
+            echo "No changes in site/metrics.json"
           fi
