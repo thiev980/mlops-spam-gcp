@@ -1,0 +1,73 @@
+name: Update metrics.json (daily)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "5 3 * * *"  # 03:05 UTC täglich
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-metrics
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo (main)
+        uses: actions/checkout@v4
+
+      - name: Install ssh client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VM_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Run export script on VM
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}" <<'EOSSH'
+            set -euo pipefail
+            cd ~/mlops-spam-gcp
+            git pull --rebase
+            if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi
+            python3 tools/export_metrics_for_pages.py \
+              --out-json /tmp/metrics.json \
+              --out-csv  /tmp/metrics.csv
+          EOSSH
+
+      - name: Switch to gh-pages
+        run: |
+          git fetch origin gh-pages:gh-pages || true
+          git checkout gh-pages
+
+      - name: Copy artifacts from VM
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+        run: |
+          scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:/tmp/metrics.json" ./metrics.json
+          # Optional: CSV mitveröffentlichen
+          # scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:/tmp/metrics.csv"  ./metrics.csv
+          test -f index.html || echo "<h1>placeholder</h1>" > index.html
+
+      - name: Commit & push if changed (gh-pages)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- metrics.json; then
+            git add metrics.json
+            git commit -m "metrics: daily auto-update"
+            git push origin gh-pages
+          else
+            echo "No changes in metrics.json"
+          fi
