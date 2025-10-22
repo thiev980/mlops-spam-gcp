@@ -38,7 +38,7 @@ jobs:
           VM_USER: ${{ secrets.VM_USER }}
         run: |
           set -euo pipefail
-          # 1) Auf der VM: Repo säubern, DSN setzen, Export fahren
+          echo "[LOCAL] Connecting to VM..."
           ssh -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}" bash -lc '
             set -euo pipefail
             cd ~/mlops-spam-gcp
@@ -46,26 +46,21 @@ jobs:
             git fetch origin main || true
             git reset --hard origin/main
             git clean -fd
-            # DSN für Postgres von der VM (Host) aus:
             export METRICS_PG_DSN="postgresql://airflow:airflow@127.0.0.1:5432/airflow_prod"
-            # optionaler Sanity-Check
-            PGPASSWORD=airflow psql "host=127.0.0.1 user=airflow dbname=airflow_prod" -tAc "SELECT count(*) FROM metrics_history" || true
-            # venv nutzen, falls vorhanden
             [ -f .venv/bin/activate ] && . .venv/bin/activate
             python3 tools/export_metrics_for_pages.py
             echo "[VM] Export done:"
             ls -lh docs/metrics.json
           '
-          # 2) metrics.json von der VM holen
-          scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:~/mlops-spam-gcp/docs/metrics.json" docs/metrics.json
+          echo "[LOCAL] Copy metrics.json from VM..."
+          scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:~/mlops-spam-gcp/docs/metrics.json" ./metrics.json
 
       - name: Commit & push metrics.json to gh-pages
         run: |
           set -euo pipefail
-          # Wechsel in gh-pages, Datei aktualisieren und zurück
           git fetch origin gh-pages || true
           git checkout -B gh-pages origin/gh-pages || git checkout -b gh-pages
-          cp docs/metrics.json ./metrics.json
+          mv -f ./metrics.json metrics.json
           if ! git diff --quiet -- metrics.json; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -75,5 +70,4 @@ jobs:
           else
             echo "No changes in metrics.json"
           fi
-          # zurück auf main (optional)
           git checkout main || true
