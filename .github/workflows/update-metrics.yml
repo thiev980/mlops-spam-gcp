@@ -3,7 +3,7 @@ name: Update metrics.json (daily)
 on:
   workflow_dispatch: {}
   schedule:
-    # Täglich 03:05 UTC (entspricht 05:05 in CH im Sommer, 04:05 im Winter)
+    # Täglich 03:05 UTC (Sommer: 05:05 CH, Winter: 04:05)
     - cron: "5 3 * * *"
 
 permissions:
@@ -18,24 +18,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout gh-pages
         uses: actions/checkout@v4
+        with:
+          ref: gh-pages
 
-      - name: Install ssh client
-        run: |
-          set -eo pipefail
-          sudo apt-get update
-          sudo apt-get install -y openssh-client
+      - name: Install SSH client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
 
-      - name: Setup SSH key
+      - name: Setup SSH key & known_hosts
         run: |
-          set -eo pipefail
           mkdir -p ~/.ssh
           echo "${{ secrets.VM_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.VM_HOST }}" >> ~/.ssh/known_hosts
+          # Host key pinning (nimm den ed25519-Key deiner VM-IP)
+          cat >> ~/.ssh/known_hosts <<'EOF'
+          34.65.44.185 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBfFzZbf7u5wzJqSW+RtHGr02Nh8MxDnVDjL0H0Cvtj9
+          EOF
+          chmod 644 ~/.ssh/known_hosts
 
-      - name: Run export script on VM
+      - name: Run export on VM
         env:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
@@ -44,39 +46,34 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}" bash -lc '
             set -eo pipefail
             cd ~/mlops-spam-gcp
-            echo "[VM] Resetting repo to clean state..."
-            git fetch origin main || true
-            git reset --hard origin/main
-            git clean -fd
-            echo "[VM] Running export..."
+            # (optional) venv nutzen
             if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi
+            # DSN für Postgres-Container, der auf der VM auf 5432 published ist:
+            export METRICS_PG_DSN="postgresql://airflow:airflow@127.0.0.1:5432/airflow_prod"
             python3 tools/export_metrics_for_pages.py
-            echo "[VM] Created files:"
+            echo "[VM] Created:"
             ls -lh docs/metrics.json || true
           '
 
-      - name: Copy metrics.json from VM to runner
+      - name: Copy metrics.json from VM
         env:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
         run: |
           set -eo pipefail
-          mkdir -p site
-          echo "[Runner] Copying docs/metrics.json from VM..."
-          scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:~/mlops-spam-gcp/docs/metrics.json" site/metrics.json
-          echo "[Runner] Preview of copied file:"
-          head -c 200 site/metrics.json || true
+          scp -i ~/.ssh/id_ed25519 "${VM_USER}@${VM_HOST}:~/mlops-spam-gcp/docs/metrics.json" ./metrics.json
+          test -f ./index.html || echo "<h1>placeholder</h1>" > index.html
+          ls -lh metrics.json
 
-      - name: Commit & push if changed
+      - name: Commit & push if changed (gh-pages)
         run: |
           set -eo pipefail
-          if ! git diff --quiet -- site/metrics.json; then
-            echo "[GIT] Changes detected – committing update..."
+          if ! git diff --quiet -- metrics.json; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add site/metrics.json
+            git add metrics.json
             git commit -m "metrics: daily auto-update"
-            git push
+            git push origin gh-pages
           else
-            echo "[GIT] No changes in site/metrics.json"
+            echo "No changes in metrics.json"
           fi
