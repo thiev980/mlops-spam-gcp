@@ -58,16 +58,28 @@ jobs:
       - name: Commit & push metrics.json to gh-pages
         run: |
           set -euo pipefail
+          echo "[GHA] Switching to gh-pages branch..."
           git fetch origin gh-pages || true
+
+          # Wenn metrics.json im Weg ist, weg damit
+          rm -f metrics.json || true
+
+          # Jetzt gewaltsam den Branch wechseln (ohne Fehlermeldung)
           git checkout -B gh-pages origin/gh-pages || git checkout -b gh-pages
-          mv -f ./metrics.json metrics.json
+
+          # metrics.json aus dem vorherigen Schritt hierher verschieben
+          cp ../metrics.json ./metrics.json 2>/dev/null || mv -f ./metrics.json ./metrics.json
+
+          echo "[GHA] Preparing commit..."
           if ! git diff --quiet -- metrics.json; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add metrics.json
             git commit -m "metrics: daily auto-update"
             git push -u origin gh-pages
+            echo "[GHA] ✅ Updated gh-pages branch."
           else
-            echo "No changes in metrics.json"
+            echo "[GHA] No changes in metrics.json"
           fi
+
           git checkout main || true
