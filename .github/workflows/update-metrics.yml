@@ -58,17 +58,21 @@ jobs:
       - name: Commit & push metrics.json to gh-pages
         run: |
           set -euo pipefail
-          echo "[GHA] Switching to gh-pages branch..."
+          echo "[GHA] Prepare temp copy of metrics.json..."
+          TMP="/tmp/metrics.json.$RANDOM"
+          test -f metrics.json || { echo "metrics.json not found in workspace!"; exit 1; }
+          cp metrics.json "$TMP"
+
+          echo "[GHA] Switching to gh-pages..."
           git fetch origin gh-pages || true
-
-          # Wenn metrics.json im Weg ist, weg damit
-          rm -f metrics.json || true
-
-          # Jetzt gewaltsam den Branch wechseln (ohne Fehlermeldung)
+          # sauberes Arbeitsverzeichnis sicherstellen
+          git reset --hard
+          git clean -fd
           git checkout -B gh-pages origin/gh-pages || git checkout -b gh-pages
 
-          # metrics.json aus dem vorherigen Schritt hierher verschieben
-          cp ../metrics.json ./metrics.json 2>/dev/null || mv -f ./metrics.json ./metrics.json
+          echo "[GHA] Restoring metrics.json into gh-pages..."
+          cp "$TMP" metrics.json
+          rm -f "$TMP"
 
           echo "[GHA] Preparing commit..."
           if ! git diff --quiet -- metrics.json; then
@@ -82,4 +86,5 @@ jobs:
             echo "[GHA] No changes in metrics.json"
           fi
 
+          # optional: zurück auf main
           git checkout main || true
