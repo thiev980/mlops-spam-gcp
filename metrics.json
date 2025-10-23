@@ -108,5 +108,16 @@
     "spam_rate": 0.204545,
     "roc_auc": 0.885714,
     "balanced_accuracy": 0.555556
+  },
+  {
+    "ds": "2025-10-23",
+    "f1": 0.4,
+    "precision": 1.0,
+    "recall": 0.25,
+    "threshold_used": 0.9425575569021424,
+    "suggested_threshold": 0.9416751117393316,
+    "spam_rate": 0.20202,
+    "roc_auc": 0.878797,
+    "balanced_accuracy": 0.625
   }
 ]
