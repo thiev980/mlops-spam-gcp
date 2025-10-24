@@ -1,104 +1,66 @@
-# MLOps Spam Detection Pipeline
+# Spam Model Monitoring (Airflow + MLflow + Grafana + GitHub Actions)
 
-End-to-end MLOps pipeline for SMS spam classification, built with **Airflow**, **MLflow**, **PostgreSQL**, **Redis**, and **Grafana** — containerized via **Docker Compose** and ready for deployment on **Google Cloud**.
+[![Daily Metrics Update](https://github.com/thiev980/mlops-spam-gcp/actions/workflows/update-metrics.yml/badge.svg)](https://github.com/thiev980/mlops-spam-gcp/actions/workflows/update-metrics.yml)
+[![GitHub Pages](https://img.shields.io/badge/live%20metrics-online-success)](https://thiev980.github.io/mlops-spam-gcp/)
 
----
-
-## Overview
-
-This project demonstrates a complete MLOps workflow for a text classification use case (spam detection).  
-It includes data ingestion, preprocessing, model training with hyperparameter tuning, experiment tracking, and performance monitoring — all orchestrated with Airflow and logged in MLflow.
+An end-to-end MLOps project for **daily monitoring of a spam detection model**.
+Automatically orchestrated, visualized, and published — entirely in the cloud.
 
 ---
 
-## Tech Stack
+## Architecture
 
-| Component | Purpose |
-|------------|----------|
-| **Airflow** | Workflow orchestration (training, evaluation, retraining) |
-| **MLflow** | Experiment tracking & model registry |
-| **PostgreSQL** | Metadata storage (Airflow + MLflow) |
-| **Redis** | Message broker for CeleryExecutor |
-| **Grafana** | Metrics visualization from MLflow DB |
-| **Docker Compose** | Containerized environment (Dev/Prod) |
+- **Airflow** – orchestrates daily evaluation runs and stores metrics in PostgreSQL 
+- **MLflow** – manages models and threshold artifacts
+- **Grafana** – visualizes historical trends and drifts 
+- **GitHub Actions** – exports daily metrics from the VM 
+- **GitHub Pages** – hosts the live performance preview (JSON + chart)
 
 ---
 
-## Project Structure
+## Workflow
 
-```
-mlops-spam-gcp/
-├── airflow-docker/
-│   ├── dags/                # Airflow DAGs (pipelines)
-│   ├── models-dev/          # Saved models (dev)
-│   ├── data-dev/            # Local data inputs
-│   ├── logs-dev/            # Airflow logs
-│   ├── Dockerfile           # Airflow base image
-│   ├── Dockerfile.mlflow    # MLflow service image
-│   └── requirements.txt     # Python dependencies for Airflow
-├── fastapi_app/             # Optional: REST API for inference
-├── notebooks/               # Exploratory notebooks
-├── docker-compose.dev.yml   # Dev environment
-├── docker-compose.prod.yml  # Prod environment
-├── .env.dev / .env.prod     # Environment variables
-└── Makefile                 # Quick commands for switching environments
+```mermaid
+graph LR
+    A[Airflow DAGs] --> B[PostgreSQL metrics_history]
+    B --> C[export_metrics_for_pages.py]
+    C --> D[GitHub Actions]
+    D --> E[gh-pages branch]
+    E --> F[GitHub Pages Dashboard]
 ```
 
----
-
-## Setup & Usage
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/thiev980/mlops-spam-gcp.git
-cd mlops-spam-gcp
-```
-
-### 2. Spin up the **Dev** environment
-```bash
-make up-dev
-```
-Services will start:
-- Airflow → [http://localhost:8080](http://localhost:8080)  
-- MLflow → [http://localhost:5002](http://localhost:5002)  
-- Grafana → [http://localhost:3000](http://localhost:3000)
-
-### 3. Trigger a pipeline
-In the Airflow UI, trigger the DAG **`spam_train_tune`** to start model training and log metrics to MLflow.
-
-### 4. Visualize results
-In Grafana, connect to the MLflow Postgres DB and visualize metrics (F1, precision, recall, ROC AUC, etc.).
+Every night at **03:05 UTC**:
+1. Airflow writes the latest model metrics to Postgres 
+2. `export_metrics_for_pages.py` exports them as JSON
+3. GitHub Actions fetches the file from the VM 
+4. The `metrics.json` is automatically deployed → [Live Dashboard](https://thiev980.github.io/mlops-spam-gcp/)
 
 ---
 
-## Deployment
+## Live Monitoring
 
-The same stack can be deployed to **Google Cloud** using:
-- **Cloud Run** for the services (Airflow, MLflow, FastAPI)
-- **Cloud SQL** for PostgreSQL
-- **Cloud Storage** for artifacts and data
-- **Cloud Logging / Monitoring** for observability
+**[View the latest deployment](https://thiev980.github.io/mlops-spam-gcp/)**  
+*(auto-updated daily via CI/CD)*
 
----
-
-## Key Features
-
-- Automated training & retraining via Airflow DAGs  
-- Centralized experiment tracking in MLflow  
-- Real-time monitoring dashboards in Grafana  
-- Isolated Dev & Prod Docker Compose environments  
-- Cloud-ready architecture for GCP deployment  
+![Metrics Trend Screenshot](docs/assets/metrics_trend.png)
 
 ---
 
-## Author
+## Stack
 
-**Thi Fi**  
-Editorial Data Analyst & MLOps Enthusiast  
-📍 Zürich  
+| Category | Tool / Framework |
+|------------|------------------|
+| Orchestration | Apache Airflow |
+| Tracking | MLflow |
+| Monitoring | Grafana |
+| Database | PostgreSQL |
+| Automation | GitHub Actions |
+| Hosting | GitHub Pages |
 
 ---
 
-## License
+## Contact
 
-This project is released under the MIT License. See `LICENSE` for details.
+👤 **Thierry Figini**  
+🔗 [GitHub-Profil](https://github.com/thiev980) • [LinkedIn](https://www.linkedin.com/in/thierryfigini/)  
+✉️ thierry_figini@me.com
