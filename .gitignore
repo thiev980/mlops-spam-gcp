@@ -1,0 +1,7 @@
+.venv/
+airflow-docker/
+grafana-data/
+pgdata-prod/
+postgres-init/
+.env
+.env.prod
