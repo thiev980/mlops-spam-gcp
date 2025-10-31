@@ -100,6 +100,65 @@
       <p class="subtle">Source: Airflow → Postgres → export → GitHub Pages (auto-update).</p>
     </section>
 
+    <div class="card">
+  <h3>Try the model (live)</h3>
+  <form id="predictForm">
+    <textarea id="msg" rows="4" style="width:100%" placeholder="Paste a message..."></textarea>
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+      <button id="btn" type="submit">Predict</button>
+      <span class="muted" id="hint">Calls FastAPI on your VM</span>
+    </div>
+  </form>
+  <div id="predOut" style="margin-top:12px"></div>
+</div>
+
+<script>
+async function callPredict(text){
+  const res = await fetch('http://34.77.169.118:5000/predict', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({text})
+  });
+  if(!res.ok){
+    const t = await res.text();
+    throw new Error(`HTTP ${res.status}: ${t}`);
+  }
+  return await res.json();
+}
+
+document.getElementById('predictForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const btn = document.getElementById('btn');
+  const out = document.getElementById('predOut');
+  const msg = document.getElementById('msg').value.trim();
+  if(!msg){ out.innerHTML = `<span class="muted">Enter some text.</span>`; return; }
+  btn.disabled = true; out.innerHTML = 'Predicting...';
+  try{
+    const r = await callPredict(msg);
+    const p = (r.probability_spam*100).toFixed(1);
+    out.innerHTML = `
+      <div class="kpis">
+        <div class="card">
+          <div class="muted">Prediction</div>
+          <div style="font-size:22px;font-weight:600">${r.prediction.toUpperCase()}</div>
+        </div>
+        <div class="card">
+          <div class="muted">Spam probability</div>
+          <div style="font-size:22px;font-weight:600">${p}%</div>
+        </div>
+        <div class="card">
+          <div class="muted">Threshold</div>
+          <div style="font-size:22px;font-weight:600">${r.threshold.toFixed(3)}</div>
+        </div>
+      </div>`;
+  }catch(err){
+    out.innerHTML = `<span class="muted">Error: ${err.message}</span>`;
+  }finally{
+    btn.disabled = false;
+  }
+});
+</script>
+
     <footer>
       © <span id="y"></span> Thierry Figini · <a href="https://github.com/thiev980/mlops-spam-gcp" target="_blank" rel="noopener">GitHub</a>
     </footer>
