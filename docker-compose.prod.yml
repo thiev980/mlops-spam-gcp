@@ -161,6 +161,21 @@ services:
     volumes:
       - mlartifacts_prod:/mlartifacts
 
+  fastapi:
+    build:
+      context: .
+      dockerfile: fastapi_app/Dockerfile
+    container_name: spam-fastapi
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./airflow-docker/models-prod:/app/models:ro
+      - ./fastapi_app:/app/fastapi_app:ro
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
 volumes:
   pgdata_prod:
   grafana_data_prod:
