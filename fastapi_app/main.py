@@ -52,10 +52,10 @@ class PredictResponse(BaseModel):
 
 app = FastAPI(title="Spam Classifier API", version="1.0.0")
 
-# CORS: Deine GitHub-Page darf anfragen
+# CORS: Deine GitHub-Page & eigene Domain darf anfragen
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://thiev980.github.io"],
+    allow_origins=["https://thiev980.github.io", "https://fastapi.thiev980.com"],
     allow_credentials=False,
     allow_methods=["POST", "GET", "OPTIONS"],
     allow_headers=["*"],
