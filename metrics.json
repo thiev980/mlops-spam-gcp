@@ -260,7 +260,7 @@
     "precision": 1.0,
     "recall": 0.12,
     "roc_auc": 0.8932,
-    "threshold_used": 0.7956684303496249,
+    "threshold_used": 0.8100314197508388,
     "suggested_threshold": 0.856234688475489,
     "n": 125,
     "tp": 3,
