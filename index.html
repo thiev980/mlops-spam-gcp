@@ -114,7 +114,7 @@
 
 <script>
 async function callPredict(text){
-  const res = await fetch('http://34.77.169.118:5000/predict', {
+  const res = await fetch('https://fastapi.thiev980.com/predict', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({text})
