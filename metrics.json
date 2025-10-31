@@ -256,17 +256,17 @@
   },
   {
     "ds": "2025-10-31",
-    "f1": 0.0,
-    "precision": 0.0,
-    "recall": 0.0,
+    "f1": 0.214286,
+    "precision": 1.0,
+    "recall": 0.12,
     "roc_auc": 0.8932,
-    "threshold_used": 0.9902122036744314,
+    "threshold_used": 0.7956684303496249,
     "suggested_threshold": 0.856234688475489,
     "n": 125,
-    "tp": 0,
+    "tp": 3,
     "tn": 100,
     "fp": 0,
-    "fn": 25,
+    "fn": 22,
     "spam_rate": 0.2
   }
 ]
