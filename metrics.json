@@ -658,5 +658,20 @@
     "fp": 1,
     "fn": 23,
     "spam_rate": 0.203008
+  },
+  {
+    "ds": "2025-11-27",
+    "f1": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "roc_auc": 0.784483,
+    "threshold_used": 0.972175679920901,
+    "suggested_threshold": 0.0223281322647178,
+    "n": 145,
+    "tp": 0,
+    "tn": 115,
+    "fp": 1,
+    "fn": 29,
+    "spam_rate": 0.2
   }
 ]
