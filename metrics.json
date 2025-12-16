@@ -943,5 +943,20 @@
     "fp": 0,
     "fn": 24,
     "spam_rate": 0.2
+  },
+  {
+    "ds": "2025-12-16",
+    "f1": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "roc_auc": 0.870226,
+    "threshold_used": 0.9917014156258216,
+    "suggested_threshold": 0.7955907125097662,
+    "n": 120,
+    "tp": 0,
+    "tn": 96,
+    "fp": 0,
+    "fn": 24,
+    "spam_rate": 0.2
   }
 ]
